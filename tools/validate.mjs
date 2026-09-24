@@ -1,9 +1,20 @@
 // Data integrity checks for PixelKits. Usage: node tools/validate.mjs
-import { loadGame } from './load.mjs';
-const PK = loadGame();
+import fs from 'fs';
+import path from 'path';
+import vm from 'vm';
+import { loadGame, ROOT } from './load.mjs';
 let errors = 0, warns = 0;
 const err = (...a) => { errors++; console.log('ERROR', ...a); };
 const warn = (...a) => { warns++; console.log('warn ', ...a); };
+
+// ---- every script referenced by index.html must exist and parse
+const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+for (const [, src] of html.matchAll(/<script src="([^"]+)"/g)) {
+  const f = path.join(ROOT, src);
+  if (!fs.existsSync(f)) { err('missing script', src); continue; }
+  try { new vm.Script(fs.readFileSync(f, 'utf8'), { filename: src }); } catch (e) { err('syntax error in', src, e.message); }
+}
+const PK = loadGame();
 
 // ---- kits / moves / items
 const kitIds = Object.keys(PK.KITS).map(Number);

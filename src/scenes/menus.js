@@ -209,7 +209,7 @@
       F().draw(ctx, k.ot || PK.game.state.player.name, 10, 118, t.text);
       if (k.status) statusTag(ctx, k.status, 10, 132);
       F().draw(ctx, sp.cat, 10, 144, t.dim);
-    } else {
+    } else if (this.page === 1) {
       for (var m = 0; m < 4; m++) {
         var mv = k.moves[m];
         var yy = 32 + m * 30;
