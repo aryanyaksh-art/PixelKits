@@ -25,7 +25,7 @@
     cave: { style: 'cave', g: ['#64503e', '#806a54', '#9c866c'], tg: ['#4a3a2c', '#64503e', '#806a54', '#9c866c'], path: ['#56463a', '#725e4a', '#8c7660'], tree: 'stal', leaf: '#806a54', trunk: '#5c4a3a', water: ['#1c3c6c', '#2a5a96', '#4c80c0', '#9cc4ec'], wall: ['#3a2e26', '#584638', '#78624c'], fence: '#8a6a4a', fl: ['#a09080', '#c0b0a0', '#807060', '#b0a090'], pave: ['#5c5040', '#78685a', '#907e6c'] },
     ice: { style: 'cave', g: ['#7496bc', '#96b6d6', '#bcd6ee'], tg: ['#4c6e94', '#6a8cb2', '#8cacd0', '#b4d0ec'], path: ['#6a88ac', '#86a4c6', '#a4c0de'], tree: 'crystal', leaf: '#9ad8f0', trunk: '#5a7aa2', water: ['#1c3c6c', '#2a5a96', '#4c80c0', '#9cc4ec'], wall: ['#3a5478', '#56749c', '#82a2c6'], fence: '#8aa0c0', fl: ['#e0f4ff', '#a8e0ff', '#ffffff', '#c8e8ff'], pave: ['#6a88ac', '#86a4c6', '#a4c0de'] },
     volcano: { style: 'cave', g: ['#462c2c', '#603a34', '#7c4e46'], tg: ['#301c1c', '#462c2c', '#603a34', '#7c4e46'], path: ['#3a2424', '#543232', '#6e4440'], tree: 'stal', leaf: '#603a34', trunk: '#3a2424', water: ['#a02a10', '#d04a14', '#f08a2a', '#ffd060'], wall: ['#261616', '#402426', '#5c3634'], fence: '#5c3634', fl: ['#f08a2a', '#ffd060', '#d04a14', '#ffb040'], pave: ['#3a2424', '#543232', '#6e4440'] },
-    ruins: { style: 'stone', g: ['#646274', '#827f92', '#a4a2b4'], tg: ['#3c5a4a', '#4e7a5c', '#6a9c72', '#94c08c'], path: ['#5a586a', '#747284', '#8e8c9e'], tree: 'crystal', leaf: '#c8a0ff', trunk: '#5a4a7a', water: ['#2a4a8a', '#3a64b0', '#6a94d8', '#c8dcff'], wall: ['#403e4c', '#5c5a6a', '#7c7a8c'], fence: '#8a889a', fl: ['#e8d0ff', '#ffe890', '#a0f0e0', '#ffffff'], pave: ['#5a586a', '#747284', '#8e8c9e'] },
+    ruins: { style: 'stone', g: ['#646274', '#827f92', '#a4a2b4'], tg: ['#3c5a4a', '#4e7a5c', '#6a9c72', '#94c08c'], path: ['#5a586a', '#747284', '#8e8c9e'], tree: 'crystal', leaf: '#c8a0ff', trunk: '#5a4a7a', water: ['#2a4a8a', '#3a64b0', '#6a94d8', '#c8dcff'], wall: ['#403e4c', '#5c5a6a', '#7c7a8c'], fence: '#8a889a', fl: ['#e8d0ff', '#ffe890', '#a0f0e0', '#ffffff'], pave: ['#8a8070', '#a89c88', '#c8bca4'] },
     house: { style: 'wood', floor: ['#9a6a3a', '#bc8850', '#d6a66a'], wall: ['#c4b494', '#e2d4b6', '#f4ecd8'], trim: '#6a4424', rug: ['#8a2e36', '#b8484e', '#e0807a'] },
     lab: { style: 'tile', floor: ['#b0b6c4', '#d4d8e4', '#eef0f6'], wall: ['#9eb0c4', '#c2d0de', '#e0eaf4'], trim: '#4a5a72', rug: ['#2e5a8a', '#4a7ab0', '#7aa6d8'] },
     clinic: { style: 'tile', floor: ['#c4b4bc', '#e6d8de', '#f8f0f4'], wall: ['#aed4ca', '#cdeae2', '#e8f8f2'], trim: '#2e8474', rug: ['#2e8474', '#48a494', '#7ccab8'] },
@@ -478,6 +478,7 @@
         fill(x, wl[0], 0, 0, 1, 16); fill(x, wl[0], 15, 0, 1, 16);
         break;
       case ' ': fill(x, '#000'); break;
+      case 'Q': if (!interior) { groundBase(x, P, r); furniture(x, Object.assign({ trim: '#c8a0ff' }, P), 'Q', frame); } else furniture(x, P, ch, frame); break;
       default:
         if (interior) furniture(x, P, ch, frame);
     }
