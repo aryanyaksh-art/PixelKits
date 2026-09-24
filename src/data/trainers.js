@@ -28,14 +28,14 @@
   K('willow_2', 'Scout', 'Lia', 'girl', [[14, 4], [14, 4]], { intro: 'Scouts are always prepared! Are you?', after: 'I should have packed more Tonics.' });
   K('pine_gym1', 'Keeper', 'Petra', 'girl', [[19, 8]], { intro: 'Warden Fenna taught me everything! Let me show you!', after: 'Fenna is much stronger than me.' });
   K('pine_gym2', 'Keeper', 'Moss', 'boy', [[46, 9], [1, 8]], { intro: "You won't cut through our forest so easily!", after: 'You have a green thumb for battling.' });
-  K('warden1', 'Warden', 'Fenna', 'fenna', [[19, 10], [46, 12]], { reward: 100, ai: 2, items: 1, music: 'gym', lose: 'You grew past me like a sapling reaching for the sun!' });
+  K('warden1', 'Warden', 'Fenna', 'fenna', [[19, 9], [46, 11]], { reward: 100, ai: 2, items: 0, music: 'gym', lose: 'You grew past me like a sapling reaching for the sun!' });
   K('woods_1', 'Bug Nut', 'Pip', 'kid', [[14, 6], [15, 7], [21, 7]], { intro: 'Bugs are the best! Look at my collection!', after: 'My bugs need more sunlight...' });
   K('woods_2', 'Bug Nut', 'Otto', 'kid', [[21, 8], [62, 8]], { intro: 'Bzzzt! You walked into my web!', after: 'My web had a hole in it.' });
   K('woods_3', 'Scout', 'Tilly', 'girl', [[19, 8], [23, 9]], { intro: 'The woods are full of surprises. Like me!', after: 'Surprise! I lost.' });
   K('woods_4', 'Rookie', 'Theo', 'boy', [[10, 8], [12, 8], [27, 9]], { intro: "Hey! You look like you've got good Kits!", after: 'Next time I\'ll win for sure!' });
   K('quarry_gym1', 'Rock Hound', 'Dale', 'hiker', [[23, 13], [23, 13]], { intro: 'Rocks rule! Rocks rock!', after: 'My pebbles crumbled...' });
   K('quarry_gym2', 'Rock Hound', 'Gus', 'hiker', [[70, 14], [48, 14]], { intro: "Gideon's gym is solid as bedrock!", after: 'You broke through my defense.' });
-  K('warden2', 'Warden', 'Gideon', 'gideon', [[23, 15], [48, 15], [24, 18]], { reward: 110, ai: 2, items: 1, music: 'gym', lose: 'Hah! You moved a mountain today, kid.' });
+  K('warden2', 'Warden', 'Gideon', 'gideon', [[23, 14], [70, 15], [24, 17]], { reward: 110, ai: 2, items: 1, music: 'gym', lose: 'Hah! You moved a mountain today, kid.' });
   K('cave_1', 'Rock Hound', 'Burt', 'hiker', [[23, 12], [23, 13], [37, 13]], { intro: 'This cave echoes with the sound of battle!', after: 'Echo... echo... I lost...' });
   K('cave_2', 'Scholar', 'Ada', 'scholar', [[42, 14], [35, 13]], { intro: 'I study the glowing crystals here. Care to test a theory?', after: 'My hypothesis was incorrect.' });
   K('cave_agent1', 'Agent', 'Syndicate', 'agent', [[17, 13], [83, 13]], { intro: "The Hollow Syndicate is digging here. Scram, kid!", after: 'The boss will hear about this...', music: 'syndicate', reward: 30 });
@@ -59,7 +59,7 @@
   K('dune_4', 'Scout', 'Hazel', 'girl', [[62, 25], [83, 26]], { intro: 'I\'ve been camping out here for weeks!', after: 'Maybe I should go home.' });
   K('dune_gym1', 'Firebrand', 'Blaise', 'boy', [[44, 28], [66, 28]], { intro: 'Feel the heat!', after: 'Doused...' });
   K('dune_gym2', 'Firebrand', 'Cinda', 'girl', [[4, 28], [91, 29]], { intro: 'Ignatius burns brightest of all!', after: 'My flame flickered out.' });
-  K('warden5', 'Warden', 'Ignatius', 'ignatius', [[44, 30], [66, 31], [5, 31], [91, 33]], { reward: 140, ai: 2, items: 2, music: 'gym', lose: 'Magnificent! Your spirit burns hotter than any flame!' });
+  K('warden5', 'Warden', 'Ignatius', 'ignatius', [[44, 31], [66, 32], [5, 32], [91, 34]], { reward: 140, ai: 2, items: 2, music: 'gym', lose: 'Magnificent! Your spirit burns hotter than any flame!' });
   K('ember_1', 'Firebrand', 'Cole', 'boy', [[66, 28], [67, 30]], { intro: 'It\'s scorching in here!', after: 'I need some water.' });
   K('ember_2', 'Scholar', 'Edmund', 'scholar', [[91, 29], [49, 29]], { intro: 'These tunnels are full of rare minerals!', after: 'Fascinating defeat.' });
   K('ember_agent', 'Agent', 'Syndicate', 'agent', [[80, 30], [18, 30]], { intro: 'The guardian of the sun sleeps here... Not for long!', after: 'The Director will be furious...', music: 'syndicate', reward: 35 });
@@ -92,11 +92,11 @@
   K('summit_4', 'Veteran', 'Magnus', 'oldman', [[38, 49], [88, 49], [67, 50]], { intro: 'Turn back while you still can!', after: 'I stand corrected. Onward!' });
 
   // ---------- High Council & Champion ----------
-  K('council1', 'Councilor', 'Dax', 'dax', [[32, 52], [94, 52], [55, 53], [91, 53], [57, 55]], { reward: 200, ai: 2, items: 2, music: 'gym', intro: 'I am Dax of the High Council! My fists have never known defeat. Well... almost never!', lose: 'A fine battle! Your spirit hits harder than any punch.' });
-  K('council2', 'Councilor', 'Hemlock', 'hemlock', [[18, 53], [20, 53], [84, 54], [53, 56]], { reward: 200, ai: 2, items: 2, music: 'gym', intro: 'I am Hemlock. Poison is patient, child. It always wins in the end.', lose: 'Hmph. It seems you have an antidote for everything.' });
-  K('council3', 'Councilor', 'Orrin', 'orrin', [[38, 54], [76, 54], [89, 55], [95, 55], [57, 57]], { reward: 200, ai: 2, items: 2, music: 'gym', intro: 'Orrin, of the High Council. Steel does not bend. Neither do I.', lose: 'Remarkable. You found the cracks in my armor.' });
-  K('council4', 'Councilor', 'Sable', 'sable', [[74, 56], [93, 56], [40, 57], [41, 59]], { reward: 200, ai: 2, items: 3, music: 'gym', intro: 'I am Sable, last of the High Council. The ancient wyrms answer only to me.', lose: 'The wyrms bow to you... Go. The Champion awaits.' });
-  K('champion', 'Champion', 'Castor', 'castor', [[43, 58], [69, 58], [82, 59], [67, 59], [65, 60], [86, 62]], { reward: 300, ai: 2, items: 3, music: 'champion', intro: '', lose: 'Wonderful... Truly wonderful. Lumora has a new Champion!' });
+  K('council1', 'Councilor', 'Dax', 'dax', [[32, 50], [94, 50], [55, 51], [91, 51], [57, 53]], { reward: 200, ai: 2, items: 2, music: 'gym', intro: 'I am Dax of the High Council! My fists have never known defeat. Well... almost never!', lose: 'A fine battle! Your spirit hits harder than any punch.' });
+  K('council2', 'Councilor', 'Hemlock', 'hemlock', [[18, 51], [20, 51], [84, 52], [53, 54]], { reward: 200, ai: 2, items: 2, music: 'gym', intro: 'I am Hemlock. Poison is patient, child. It always wins in the end.', lose: 'Hmph. It seems you have an antidote for everything.' });
+  K('council3', 'Councilor', 'Orrin', 'orrin', [[38, 52], [76, 52], [89, 53], [95, 53], [57, 55]], { reward: 200, ai: 2, items: 2, music: 'gym', intro: 'Orrin, of the High Council. Steel does not bend. Neither do I.', lose: 'Remarkable. You found the cracks in my armor.' });
+  K('council4', 'Councilor', 'Sable', 'sable', [[74, 53], [93, 53], [40, 54], [41, 56]], { reward: 200, ai: 2, items: 3, music: 'gym', intro: 'I am Sable, last of the High Council. The ancient wyrms answer only to me.', lose: 'The wyrms bow to you... Go. The Champion awaits.' });
+  K('champion', 'Champion', 'Castor', 'castor', [[43, 55], [69, 55], [82, 56], [67, 56], [65, 57], [86, 59]], { reward: 300, ai: 2, items: 2, music: 'champion', intro: '', lose: 'Wonderful... Truly wonderful. Lumora has a new Champion!' });
   // post-game rematch-style challengers at Starfall
   K('star_1', 'Veteran', 'Stellan', 'oldman', [[41, 58], [43, 58], [9, 58]], { intro: 'Few ever sail this far. Show me your strength!', after: 'The stars shine on you.' });
   K('star_2', 'Mystic', 'Nova', 'mystic', [[59, 60], [86, 60], [92, 60]], { intro: 'The ruins hum with ancient power...', after: 'The ruins accept you.' });

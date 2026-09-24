@@ -166,7 +166,8 @@
   Summary.prototype.update = function () {
     var inp = PK.input, n = PK.game.state.party.length;
     if (this.list) n = this.list.length;
-    if (inp.rep('left') || inp.rep('right')) { this.page ^= 1; if (PK.audio) PK.audio.sfx('move'); }
+    if (inp.rep('left')) { this.page = (this.page + 2) % 3; if (PK.audio) PK.audio.sfx('move'); }
+    if (inp.rep('right')) { this.page = (this.page + 1) % 3; if (PK.audio) PK.audio.sfx('move'); }
     if (inp.rep('up')) { this.i = (this.i - 1 + n) % n; if (PK.audio) PK.audio.sfx('move'); }
     if (inp.rep('down')) { this.i = (this.i + 1) % n; if (PK.audio) PK.audio.sfx('move'); }
     if (inp.cancel() || inp.ok()) { if (PK.audio) PK.audio.sfx('back'); PK.pop(this); if (this.done) this.done(); }
@@ -182,7 +183,7 @@
     if (k.prism) F().draw(ctx, '★', 80, 84, '#e0a020');
     F().draw(ctx, PK.stats.name(k), 10, 92 - 1 + 0, t.text);
     PK.ui.box(ctx, 96, 4, 140, 20);
-    F().draw(ctx, ['INFO / STATS', 'MOVES'][this.page], 104, 10, t.text, t.shadow);
+    F().draw(ctx, ['INFO / STATS', 'MOVES', 'NOTES'][this.page], 104, 10, t.text, t.shadow);
     F().right(ctx, '< >', 228, 10, t.dim);
     PK.ui.box(ctx, 96, 26, 140, 130);
     if (this.page === 0) {
@@ -217,11 +218,20 @@
         typeTag(ctx, md.type, 104, yy, 38);
         F().draw(ctx, md.name, 146, yy + 2, t.text, t.shadow);
         F().draw(ctx, 'CH ' + mv.pp + '/' + md.pp, 104, yy + 14, t.dim);
-        F().draw(ctx, (md.cat === 'S' ? 'STATUS' : 'PWR ' + md.power) + '  ' + (md.acc ? 'ACC ' + md.acc : 'SURE'), 160, yy + 14, t.dim);
+        F().right(ctx, (md.cat === 'S' ? 'STATUS' : (md.cat === 'P' ? 'P' : 'T') + md.power) + ' ' + (md.acc ? md.acc + '%' : 'SURE'), 228, yy + 14, t.dim);
       }
       PK.ui.box(ctx, 4, 102, 88, 54);
-      var lines = F().wrap(sp.dex, 76);
-      for (var l = 0; l < Math.min(5, lines.length); l++) F().draw(ctx, lines[l], 9, 107 + l * 9, t.text);
+      sp.types.forEach(function (ty, j) { typeTag(ctx, ty, 10, 110 + j * 14, 76); });
+    } else {
+      F().draw(ctx, sp.cat + ' Kit', 104, 32, t.dim);
+      var lines = F().wrap(sp.dex, 124);
+      for (var l = 0; l < lines.length; l++) F().draw(ctx, lines[l], 104, 46 + l * 12, t.text, t.shadow);
+      if (k.caughtAt) F().draw(ctx, 'Met: ' + k.caughtAt, 104, 140, t.dim);
+      PK.ui.box(ctx, 4, 102, 88, 54);
+      F().draw(ctx, 'Genes', 10, 108, t.dim);
+      var gsum = k.genes.reduce(function (a, b) { return a + b; }, 0);
+      F().draw(ctx, gsum >= 70 ? 'Superb' : gsum >= 50 ? 'Strong' : gsum >= 30 ? 'Decent' : 'Humble', 10, 120, t.text);
+      if (k.prism) F().draw(ctx, '★ Prism', 10, 134, '#d0a020');
     }
   };
   function summary(i, list) {
@@ -509,7 +519,7 @@
       if (i === this.i) F().draw(ctx, '▶', 9, y, t.hi);
       F().draw(ctx, ('00' + n).slice(-3), 17, y, t.dim);
       F().draw(ctx, st.seen[n] ? PK.KITS[n].name : '----------', 38, y, t.text, t.shadow);
-      if (st.caught[n]) PK.bfx.drawCapsule(ctx, 113, y + 3, 'capsule');
+      if (st.caught[n]) { ctx.fillStyle = '#241c2c'; ctx.fillRect(110, y, 5, 7); ctx.fillStyle = '#2fb3a0'; ctx.fillRect(111, y + 1, 3, 2); ctx.fillStyle = '#f4f4f0'; ctx.fillRect(111, y + 3, 3, 3); }
     }
     PK.ui.box(ctx, 124, 24, 112, 132);
     if (st.seen[id]) {

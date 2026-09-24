@@ -485,7 +485,7 @@
 
   B.expFor = function (defeated, k, participated) {
     var sp = PK.KITS[defeated.id];
-    var v = sp.exp * defeated.level / 4 * (this.wild ? 1 : 1.5) * (participated ? 1 : 0.5);
+    var v = sp.exp * defeated.level / 2.8 * (this.wild ? 1 : 1.5) * (participated ? 1 : 0.5);
     if (k.held === 'luckyclover') v *= 1.5;
     return Math.max(1, Math.floor(v));
   };

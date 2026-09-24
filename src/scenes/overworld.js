@@ -308,14 +308,20 @@
     await PK.wait(40);
     n.emote = null;
     // walk to player
-    var p = W.p, v = DIRS[n.dir];
+    var p = W.p, v = DIRS[n.dir], face = n.dir, walked = 0, mapId = W.map.id;
     for (var guard = 0; guard < 10; guard++) {
       var nx = n.x + v[0], ny = n.y + v[1];
       if (nx === p.x && ny === p.y) break;
       await W.stepNpc(n, n.dir);
+      walked++;
     }
     p.dir = OPP[n.dir];
-    await W.keeperBattle(n);
+    var r = await W.keeperBattle(n);
+    // walk back to their post so they never block a path
+    if (r === 'win' && W.map.id === mapId) {
+      for (var b = 0; b < walked; b++) await W.stepNpc(n, OPP[face]);
+      n.dir = face;
+    }
     W.busy--;
   };
   W.keeperBattle = async function (n) {
