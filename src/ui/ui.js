@@ -232,14 +232,16 @@
     var self = this;
     this.keyHandler = function (e) {
       if (PK.top() !== self) return;
-      if (e.key && e.key.length === 1 && /[A-Za-z0-9 .,!?'&-]/.test(e.key) && self.name.length < self.max) {
-        if (e.code === 'Space' && !self.name.length) return;
-        self.name += e.key;
-        self.typed = true;
+      if (e.key && e.key.length === 1 && /[A-Za-z0-9 .,!?'&-]/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+        if (e.key === ' ' && !self.name.length) return;
+        if (self.name.length < self.max) { self.name += e.key; if (PK.audio) PK.audio.sfx('move'); }
+        else if (PK.audio) PK.audio.sfx('buzz');
       }
     };
     PK.input.onKey(this.keyHandler);
   }
+  NameEntry.prototype.enter = function () { PK.input.textMode = true; };
+  NameEntry.prototype.exit = function () { PK.input.textMode = false; PK.input.offKey(this.keyHandler); };
   NameEntry.prototype.rows = function () {
     var chars = CHARSETS[this.set];
     var grid = [];
@@ -249,7 +251,6 @@
   };
   NameEntry.prototype.update = function () {
     var inp = I(), grid = this.rows();
-    if (this.typed) { this.typed = false; }
     if (inp.rep('up')) this.cy = (this.cy - 1 + grid.length) % grid.length;
     if (inp.rep('down')) this.cy = (this.cy + 1) % grid.length;
     var row = grid[this.cy];
@@ -299,7 +300,6 @@
     }
     F().draw(ctx, 'Type on keyboard or pick letters. START = done', 8, PK.H - 1 - 7, '#6a7090');
   };
-  NameEntry.prototype.exit = function () {};
 
   PK.ui = {
     THEME: THEME, DARK: DARK, box: box, fmt: fmt, TextBox: TextBox, Menu: Menu,

@@ -20,6 +20,7 @@
       caught: {},
       defeated: {},
       picked: {},
+      cleared: {},
       visited: { brookhollow: true },
       frames: 0,
       steps: 0,
@@ -44,12 +45,28 @@
     init: function () { G.state = newState(); },
     newGame: function () { G.state = newState(); return G.state; },
     tick: function () { if (G.state) G.state.frames++; },
-    hasSave: function () {
-      try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; }
+    // ---- save slots (3). The old single save is migrated into slot 1.
+    slot: 1,
+    slotKey: function (n) { return SAVE_KEY + '_slot' + n; },
+    migrate: function () {
+      try {
+        var old = localStorage.getItem(SAVE_KEY);
+        if (old && !localStorage.getItem(G.slotKey(1))) localStorage.setItem(G.slotKey(1), old);
+        if (old) localStorage.removeItem(SAVE_KEY);
+      } catch (e) { /* storage unavailable */ }
+    },
+    hasSave: function (n) {
+      G.migrate();
+      try {
+        if (n) return !!localStorage.getItem(G.slotKey(n));
+        for (var i = 1; i <= 3; i++) if (localStorage.getItem(G.slotKey(i))) return true;
+        return false;
+      } catch (e) { return false; }
     },
     save: function () {
       try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify(G.state));
+        G.state.savedAt = Date.now();
+        localStorage.setItem(G.slotKey(G.slot), JSON.stringify(G.state));
         G.saveOptions();
         return true;
       } catch (e) { console.error(e); return false; }
@@ -57,28 +74,37 @@
     saveOptions: function () {
       try { localStorage.setItem(OPT_KEY, JSON.stringify(G.state.options)); } catch (e) { /* ignore */ }
     },
-    load: function () {
+    fixup: function (s) {
+      var base = newState();
+      for (var k in base) if (s[k] === undefined) s[k] = base[k];
+      s.options = Object.assign(loadOptions(), s.options || {});
+      if (PK.stats && PK.stats.upgrade) s.party.concat(s.box).forEach(PK.stats.upgrade);
+      return s;
+    },
+    load: function (n) {
+      G.migrate();
       try {
-        var s = JSON.parse(localStorage.getItem(SAVE_KEY));
+        var s = JSON.parse(localStorage.getItem(G.slotKey(n || G.slot)));
         if (!s) return false;
-        var base = newState();
-        for (var k in base) if (s[k] === undefined) s[k] = base[k];
-        G.state = s;
+        G.slot = n || G.slot;
+        G.state = G.fixup(s);
         return true;
       } catch (e) { console.error(e); return false; }
     },
-    saveInfo: function () {
+    deleteSlot: function (n) { try { localStorage.removeItem(G.slotKey(n)); } catch (e) { /* ignore */ } },
+    saveInfo: function (n) {
+      G.migrate();
       try {
-        var s = JSON.parse(localStorage.getItem(SAVE_KEY));
+        var s = JSON.parse(localStorage.getItem(G.slotKey(n || G.slot)));
         if (!s) return null;
-        return { name: s.player.name, crests: s.crests.filter(Boolean).length, caught: Object.keys(s.caught).length, time: s.frames, map: s.player.map };
+        return { name: s.player.name, crests: s.crests.filter(Boolean).length, caught: Object.keys(s.caught).length, time: s.frames, map: s.player.map, champion: !!(s.flags && s.flags.champion) };
       } catch (e) { return null; }
     },
     exportCode: function () { return btoa(unescape(encodeURIComponent(JSON.stringify(G.state)))); },
     importCode: function (code) {
       var s = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
       if (!s || !s.player || !s.party) throw new Error('Invalid save code');
-      G.state = s;
+      G.state = G.fixup(s);
       G.save();
     },
     // --- flags

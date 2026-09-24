@@ -23,16 +23,13 @@ const plan = [
 function battle(pTeam, eTeam, ai) {
   const b = new PK.Battle({ wild: false, playerParty: pTeam, enemyParty: eTeam, ai, enemyItems: 2 });
   for (let t = 0; t < 300; t++) {
-    // player: smart AI from its own perspective
-    const sw = [b.p, b.e]; b.p = sw[1]; b.e = sw[0];
-    const saveAi = b.ai; b.ai = 2; const items = b.enemyItems; b.enemyItems = 0;
-    let pa = b.chooseAI();
-    b.ai = saveAi; b.enemyItems = items;
-    b.p = sw[0]; b.e = sw[1];
+    const pa = b.chooseFor(b.p.slots[0], 2, false);
     const ea = b.chooseAI();
     b.runTurn(pa, ea);
-    if (b.e.kit().hp <= 0) { if (b.e.alive() === 0) return true; b.e.idx = b.nextEnemy(); b.e.reset(); }
-    if (b.p.kit().hp <= 0) { if (b.p.alive() === 0) return false; b.p.idx = b.p.party.findIndex(k => k.hp > 0); b.p.reset(); }
+    if (b.e.alive() === 0) return true;
+    if (b.p.alive() === 0) return false;
+    if (!b.e.slots[0].alive()) b.sendIn(b.e.slots[0], b.nextEnemy());
+    if (!b.p.slots[0].alive()) b.sendIn(b.p.slots[0], b.p.bench()[0]);
   }
   return false;
 }

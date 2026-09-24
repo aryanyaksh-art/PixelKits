@@ -32,6 +32,7 @@
   K('woods_1', 'Bug Nut', 'Pip', 'kid', [[14, 6], [15, 7], [21, 7]], { intro: 'Bugs are the best! Look at my collection!', after: 'My bugs need more sunlight...' });
   K('woods_2', 'Bug Nut', 'Otto', 'kid', [[21, 8], [62, 8]], { intro: 'Bzzzt! You walked into my web!', after: 'My web had a hole in it.' });
   K('woods_3', 'Scout', 'Tilly', 'girl', [[19, 8], [23, 9]], { intro: 'The woods are full of surprises. Like me!', after: 'Surprise! I lost.' });
+  K('woods_twins', 'Twins', 'Ivy', 'girl', [[14, 7], [21, 8], [15, 8]], { double: true, partner: { name: 'Ida', sprite: 'girl', lose: 'IDA: Aww, we lost together!' }, intro: 'IVY & IDA: We always battle together! Two on two!', after: "IVY: Next time we'll combine our strength even better!", needTwo: 'IVY & IDA: We only battle two on two! Come back with at least two healthy Kits.', reward: 15 });
   K('woods_4', 'Rookie', 'Theo', 'boy', [[10, 8], [12, 8], [27, 9]], { intro: "Hey! You look like you've got good Kits!", after: 'Next time I\'ll win for sure!' });
   K('quarry_gym1', 'Rock Hound', 'Dale', 'hiker', [[23, 13], [23, 13]], { intro: 'Rocks rule! Rocks rock!', after: 'My pebbles crumbled...' });
   K('quarry_gym2', 'Rock Hound', 'Gus', 'hiker', [[70, 14], [48, 14]], { intro: "Gideon's gym is solid as bedrock!", after: 'You broke through my defense.' });
@@ -46,6 +47,7 @@
   K('warden3', 'Warden', 'Juno', 'juno', [[50, 20], [21, 21], [51, 23]], { reward: 120, ai: 2, items: 1, music: 'gym', lose: 'Whoa! That was electrifying! You earned this.' });
 
   // ---------- Sunscar Coast ----------
+  K('tide_duo', 'Couple', 'Ray', 'boy', [[44, 18], [27, 18], [83, 19]], { double: true, partner: { name: 'Lu', sprite: 'girl', lose: "LU: Ray, you said we'd win!" }, intro: 'RAY & LU: A double date with a double battle!', after: 'RAY: We still make a great team.', reward: 25 });
   K('tide_1', 'Beachgoer', 'Coral', 'girl', [[27, 17], [33, 17]], { intro: 'The sun, the sea, and a battle! Perfect!', after: 'Time for a swim to cool off.' });
   K('tide_2', 'Angler', 'Hank', 'sailor', [[27, 18], [27, 18], [28, 19]], { intro: 'I fish for Kits, not compliments!', after: 'The big one got away.' });
   K('tide_3', 'Surfer', 'Kai-lo', 'swimmer', [[48, 19], [33, 19]], { intro: 'Catch this wave, dude!', after: 'Wiped out...' });
@@ -53,6 +55,7 @@
   K('salt_gym1', 'Surfer', 'Reef', 'swimmer', [[27, 23], [48, 24]], { intro: 'Marisol rules these waters!', after: 'Glub glub...' });
   K('salt_gym2', 'Angler', 'Barnaby', 'sailor', [[64, 24], [33, 24]], { intro: 'Hooked you!', after: 'Line snapped!' });
   K('warden4', 'Warden', 'Marisol', 'marisol', [[27, 25], [48, 26], [34, 26], [28, 28]], { reward: 130, ai: 2, items: 2, music: 'gym', lose: 'Like the tide, you just kept coming. Well done!' });
+  K('dune_duo', 'Sand Bros', 'Tor', 'hiker', [[24, 24], [66, 24], [70, 25]], { double: true, partner: { name: 'Dex', sprite: 'hiker', lose: 'DEX: Sand in my eyes...' }, intro: 'TOR & DEX: The Sand Bros never lose a double battle!', after: 'TOR: Okay, we lose sometimes.', reward: 25 });
   K('dune_1', 'Sand Nomad', 'Rashid', 'hiker', [[66, 23], [70, 23]], { intro: 'The dunes test everyone who crosses them.', after: 'The sand shifts in your favor.' });
   K('dune_2', 'Sand Nomad', 'Sahra', 'mystic', [[17, 24], [52, 24]], { intro: 'Have you come for the treasures of the sands?', after: 'The desert keeps its secrets.' });
   K('dune_3', 'Firebrand', 'Kip', 'boy', [[44, 25], [66, 25]], { intro: 'It\'s hot out here, but I\'m hotter!', after: 'I\'m all burned out.' });
@@ -74,6 +77,7 @@
   K('director', 'Director', 'Kael Voss', 'boss', [[80, 40], [18, 40], [76, 41], [36, 42]], { intro: '', lose: 'So this is the strength of a keeper who fights beside their Kits...', music: 'syndicate', ai: 2, items: 2, reward: 100 });
 
   // ---------- Frostcrown Highlands ----------
+  K('frost_duo', 'Ski Duo', 'Anya', 'skier', [[29, 36], [54, 36], [87, 37]], { double: true, partner: { name: 'Lev', sprite: 'skier', lose: 'LEV: Wipeout!' }, intro: 'ANYA & LEV: Race you downhill! But first, a double battle!', after: 'ANYA: You carve through battles like fresh powder.', reward: 25 });
   K('frost_1', 'Skier', 'Nils', 'skier', [[29, 34], [54, 35]], { intro: 'Race you down the mountain! Or battle, whatever.', after: 'Wipeout!' });
   K('frost_2', 'Skier', 'Freya', 'skier', [[77, 35], [87, 35]], { intro: 'The cold makes my Kits tougher!', after: 'Brrr... that stung.' });
   K('frost_3', 'Veteran', 'Harald', 'oldman', [[71, 36], [55, 36]], { intro: 'I\'ve climbed these peaks for fifty years. Show me your grit!', after: 'You have the heart of a mountaineer.' });

@@ -75,8 +75,10 @@
     var m = PK.MAPS[id];
     if (!m) throw new Error('No map ' + id);
     PK.buildMap(m);
-    // reset runtime tile changes (bushes/rocks regrow)
+    // rebuild runtime tiles, keeping bushes/rocks the player has cleared
     m.tiles = m.grid.map(function (r) { return r.split(''); });
+    var cleared = (PK.game.state.cleared || {})[id];
+    if (cleared) Object.keys(cleared).forEach(function (k) { var q = k.split(','); if (m.tiles[+q[1]]) m.tiles[+q[1]][+q[0]] = cleared[k]; });
     W.map = m;
     var st = PK.game.state;
     st.player.map = id;
@@ -89,6 +91,8 @@
     });
     W.prerender();
     if (!m.interior && W.townPoint(m)) { st.visited = st.visited || {}; st.visited[id] = true; }
+    if (!m.interior && !(m.enc && m.enc.cave) && !m.dungeon) st.lastOutdoor = { map: id, x: x, y: y };
+    if (m.interior && W.p.bike) W.p.bike = false;
     W.nameT = m.interior ? 0 : 150;
     W.initWeather();
     W.playMapMusic();
@@ -105,22 +109,55 @@
   W.fastTravel = async function () {
     var st = PK.game.state;
     if (W.map.interior || W.map.enc && W.map.enc.cave) return PK.ui.say('The Wayfinder needs open sky to work.');
-    var ids = Object.keys(PK.MAPS).filter(function (id) { return st.visited && st.visited[id] && W.townPoint(PK.MAPS[id]); });
-    var i = await PK.ui.menu(ids.map(function (id) { return PK.MAPS[id].name; }).concat(['CANCEL']), { x: 8, y: 8, title: 'Travel where?', maxRows: 9 });
-    if (i < 0 || i >= ids.length) return;
-    var pt = W.townPoint(PK.MAPS[ids[i]]);
+    var dest = await PK.townMap({ fly: true });
+    if (!dest) return;
+    var pt = W.townPoint(PK.MAPS[dest]);
     if (PK.audio) PK.audio.sfx('statup');
     W.p.surf = false;
-    await W.warp(ids[i], pt[0], pt[1], 'down', { silent: true });
+    await W.warp(dest, pt[0], pt[1], 'down', { silent: true });
   };
   W.playMapMusic = function () {
     var m = W.map;
-    var track = m.music;
+    var track = W.p.bike && !W.p.surf ? 'bike' : m.music;
     if (typeof track === 'function') track = track();
     if (track && PK.audio) PK.audio.music(track);
     W.musicTrack = track;
   };
   W.resumeMusic = function () { W.playMapMusic(); };
+  W.toggleBike = async function () {
+    var p = W.p;
+    if (!p.bike && (W.map.interior && !W.map.bikeOk)) return PK.ui.say("You can't ride a bike in here.");
+    if (!p.bike && p.surf) return PK.ui.say("You can't ride a bike on the water!");
+    p.bike = !p.bike;
+    if (PK.audio) PK.audio.sfx(p.bike ? 'statup' : 'back');
+    W.playMapMusic();
+    if (p.bike) await PK.ui.say(PK.game.state.player.name + ' got on the Trail Bike.', { auto: 40 });
+    else await PK.ui.say(PK.game.state.player.name + ' got off the Trail Bike.', { auto: 40 });
+  };
+  W.seek = async function () {
+    var st = PK.game.state, p = W.p, best = null;
+    W.map.hiddenDefs.forEach(function (h) {
+      if (st.picked[h.key]) return;
+      var d = Math.abs(h.x - p.x) + Math.abs(h.y - p.y);
+      if (Math.abs(h.x - p.x) <= 7 && Math.abs(h.y - p.y) <= 5 && (!best || d < best.d)) best = { h: h, d: d };
+    });
+    if (PK.audio) PK.audio.sfx(best ? 'emote' : 'buzz');
+    if (!best) return PK.ui.say('The Seeker Lens stays dark. Nothing is hidden nearby.');
+    if (best.d <= 1) return PK.ui.say('The Seeker Lens is blazing! Something is hidden right next to you!');
+    var dx = best.h.x - p.x, dy = best.h.y - p.y;
+    var dir = (dy < 0 ? 'north' : dy > 0 ? 'south' : '') + (dx && dy ? '-' : '') + (dx < 0 ? 'west' : dx > 0 ? 'east' : '');
+    return PK.ui.say('The Seeker Lens is glowing! Something is hidden to the ' + dir + '.');
+  };
+  W.useRegistered = function () {
+    var id = PK.game.state.registered;
+    if (!id || !PK.game.count(id)) return PK.ui.say('Register a key item from the Bag to use it with SELECT.');
+    if (id === 'bike') return W.toggleBike();
+    if (id === 'rallybell') return W.ringBell();
+    if (id === 'seekerlens') return W.seek();
+    if (id === 'wayfinder') return W.fastTravel();
+    if (id === 'townmap') return PK.menus.townMap();
+    if (id === 'kitlog') return PK.menus.kitlog();
+  };
   W.syncPlayer = function () {
     var st = PK.game.state;
     if (!W.map) return;
@@ -138,8 +175,28 @@
     W.busy--;
     await W.onEnter();
   };
+  // ferry ride between Saltmarsh and the Moonlit Isles
+  W.ferry = async function (id, x, y, dir) {
+    W.busy++;
+    if (PK.audio) PK.audio.sfx('splash');
+    await PK.fx.fadeOut(30);
+    if (PK.audio) PK.audio.music('island');
+    W.p.bike = false; W.p.surf = false;
+    await PK.ui.say('The ferry set sail across the sparkling sea...', { auto: 90 });
+    W.load(id, x, y, dir);
+    await PK.fx.fadeIn(30);
+    W.busy--;
+    await W.onEnter();
+  };
   W.onEnter = async function () {
-    var m = W.map;
+    var m = W.map, st = PK.game.state;
+    // leaving the Reserve ends the safari game
+    if (st.safari && !m.safari) {
+      st.safari = null;
+      W.busy++;
+      await PK.ui.say('ATTENDANT: Welcome back! Your safari game is over. We hope you caught something great!');
+      W.busy--;
+    }
     if (m.onEnter) await W.script(m.onEnter);
     W.checkSight();
   };
@@ -191,6 +248,7 @@
       return;
     }
     if (p.surf && c !== '~') p.surf = false;
+    if (c === '~' && p.bike) { p.bike = false; W.playMapMusic(); }
     p.moving = true; p.t = 0; p.dx = v[0]; p.dy = v[1]; p.jump = 0;
   };
   W.tryEdge = function (d) {
@@ -213,6 +271,22 @@
     var p = W.p, m = W.map, st = PK.game.state;
     st.steps++;
     if (st.hush > 0) { st.hush--; if (st.hush === 0) { W.busy++; await PK.ui.say('The Hush Spray wore off.'); W.busy--; } }
+    if (st.safari && m.safari) {
+      st.safari.steps--;
+      if (st.safari.steps <= 0) return W.safariOver('Ding-dong! Time is up!');
+    }
+    // poison hurts outside of battle every 4 steps (but never knocks a Kit out)
+    if (st.steps % 4 === 0) {
+      var hurt = false;
+      for (var pi = 0; pi < st.party.length; pi++) {
+        var pk = st.party[pi];
+        if (pk.status !== 'psn' || pk.hp <= 0) continue;
+        hurt = true;
+        if (pk.hp > 1) pk.hp--;
+        if (pk.hp <= 1) { pk.status = null; W.busy++; await PK.ui.say(PK.stats.name(pk) + ' survived the poisoning! The poison faded away.'); W.busy--; }
+      }
+      if (hurt) { PK.fx.flash(4, '#b060e0'); if (PK.audio) PK.audio.sfx('status'); }
+    }
     var key = p.x + ',' + p.y;
     var door = m.doors[key];
     if (door && door.to) {
@@ -264,6 +338,7 @@
     var lead = st.party[PK.game.firstAlive()];
     if (st.hush > 0 && lead && lvl <= lead.level) return;
     if (!lead) return;
+    if (m.safari) { PK.run(function () { return W.wildBattle(e[0], lvl, { safari: true, place: m.name }); }); return; }
     PK.run(function () { return W.wildBattle(e[0], lvl); });
   };
 
@@ -280,8 +355,17 @@
     var night = !W.map.interior && PK.game.timeOfDay() === 'night';
     var outcome = await PK.startBattle(Object.assign({ wild: true, enemy: [kit], theme: W.map.theme, night: night, place: W.map.name }, opts));
     await W.afterBattle(outcome, opts);
+    var st = PK.game.state;
+    if (opts.safari && st.safari && st.safari.balls <= 0) await W.safariOver('You ran out of Safari Capsules!');
     W.busy--;
     return outcome;
+  };
+  W.safariOver = async function (why) {
+    W.busy++;
+    if (PK.audio) PK.audio.sfx('emote');
+    await PK.ui.say('ATTENDANT (over the speaker): ' + why + ' Your safari game is over!');
+    W.busy--;
+    await W.warp('wildwood_gate', 8, 2, 'down');
   };
   W.afterBattle = async function (outcome, opts) {
     if (outcome === 'lose' && !(opts && opts.canLose)) return W.whiteout();
@@ -306,7 +390,7 @@
     for (var i = 0; i < W.npcs.length; i++) {
       var n = W.npcs[i];
       var k = n.d.keeper;
-      if (!k || n.hidden || st.defeated[k]) continue;
+      if (!k || n.hidden || n.skipSight || (st.defeated[k] && !(st.rematch && st.rematch[k]))) continue;
       var v = DIRS[n.dir], range = n.d.sight == null ? 4 : n.d.sight;
       for (var s = 1; s <= range; s++) {
         var x = n.x + v[0] * s, y = n.y + v[1] * s;
@@ -338,16 +422,23 @@
     p.dir = OPP[n.dir];
     var r = await W.keeperBattle(n);
     // walk back to their post so they never block a path
-    if (r === 'win' && W.map.id === mapId) {
+    if ((r === 'win' || r === 'skip') && W.map.id === mapId) {
       for (var b = 0; b < walked; b++) await W.stepNpc(n, OPP[face]);
       n.dir = face;
     }
     W.busy--;
   };
   W.keeperBattle = async function (n) {
-    var id = n.d.keeper, tr = PK.TRAINERS[id];
-    if (tr.intro) await PK.ui.say(tr.intro);
-    var r = await W.battle(id);
+    var id = n.d.keeper, tr = PK.TRAINERS[id], st = PK.game.state;
+    var rematch = !!(st.rematch && st.rematch[id]);
+    if (tr.double && PK.game.aliveCount() < 2) {
+      n.skipSight = true;
+      await PK.ui.say(tr.needTwo || (tr.name + (tr.partner ? ' & ' + tr.partner.name : '') + ': We battle two at a time! Come back with at least two healthy Kits.'));
+      return 'skip';
+    }
+    if (rematch) await PK.ui.say(tr.rematchText || tr.name + ": Hey, I remember you! My team got stronger since last time. Let's go!");
+    else if (tr.intro) await PK.ui.say(tr.intro);
+    var r = await W.battle(id, { rematch: rematch });
     if (r === 'win' && tr.after) await PK.ui.say(tr.after);
     return r;
   };
@@ -358,14 +449,56 @@
     var tr = PK.TRAINERS[id];
     var st = PK.game.state;
     var team = typeof tr.team === 'function' ? tr.team(st) : tr.team;
-    var enemy = team.map(function (e) { return PK.stats.create(e[0], e[1], { noPrism: true, genes: tr.genes != null ? tr.genes : 8 + PK.rnd(8), moves: e[2], held: e[3] }); });
+    if (opts.rematch) team = W.rematchTeam(tr, team);
+    var enemy = team.map(function (e) { return PK.stats.create(e[0], e[1], { noPrism: true, genes: tr.genes != null ? tr.genes : 8 + PK.rnd(8), moves: opts.rematch ? null : e[2], held: e[3] }); });
     W.busy++;
     await W.battleTransition();
-    var outcome = await PK.startBattle({ wild: false, enemy: enemy, trainer: tr, theme: W.map.theme, ai: tr.ai, items: tr.items || 0, music: tr.music, canLose: opts.canLose || tr.canLose, night: !W.map.interior && PK.game.timeOfDay() === 'night' });
-    if (outcome === 'win') st.defeated[id] = true;
+    var outcome = await PK.startBattle({ wild: false, double: !!tr.double, enemy: enemy, trainer: tr, trainer2: tr.partner || null, theme: W.map.theme, ai: tr.ai, items: tr.items || 0, music: tr.music, canLose: opts.canLose || tr.canLose, night: !W.map.interior && PK.game.timeOfDay() === 'night' });
+    if (outcome === 'win') {
+      st.defeated[id] = true;
+      if (st.rematch) delete st.rematch[id];
+    }
     await W.afterBattle(outcome, { canLose: opts.canLose || tr.canLose });
     W.busy--;
     return outcome;
+  };
+
+  // ---------------- rematches (Rally Bell) ----------------
+  W.canRematch = function (id) {
+    var tr = PK.TRAINERS[id];
+    return tr && !tr.noRematch && !/^(rival|warden|council|champion|captain|director|voss|isle_boss)/.test(id) && tr.title !== 'Agent';
+  };
+  // Rematch teams scale with the player's strongest Kit and evolve when old enough
+  W.rematchTeam = function (tr, team) {
+    var st = PK.game.state;
+    var lead = Math.max.apply(null, st.party.map(function (k) { return k.level; }).concat([5]));
+    var top = Math.max.apply(null, team.map(function (e) { return e[1]; }));
+    var bonus = Math.max(4, Math.min(40, Math.round((lead - top) * 0.85)));
+    return team.map(function (e) {
+      var L = Math.min(100, e[1] + bonus), id = e[0];
+      for (var g = 0; g < 3; g++) { var ev = PK.KITS[id].evo; if (ev && ev.lvl && !ev.item && L >= ev.lvl) id = ev.to; }
+      return [id, L, null, e[3]];
+    });
+  };
+  W.ringBell = async function () {
+    var st = PK.game.state;
+    var charge = st.steps - (st.bellAt == null ? -999 : st.bellAt);
+    if (charge < 100) return PK.ui.say('The Rally Bell is still humming from its last ring. (' + (100 - charge) + ' more steps)');
+    if (W.map.interior && !/gym/.test(W.map.id)) return PK.ui.say('It would be rude to ring that in here.');
+    st.bellAt = st.steps;
+    if (PK.audio) PK.audio.sfx('statup');
+    await PK.ui.say(st.player.name + ' rang the Rally Bell!', { auto: 50 });
+    st.rematch = st.rematch || {};
+    var p = W.p, any = [];
+    W.npcs.forEach(function (n) {
+      var id = n.d.keeper;
+      if (!id || n.hidden || !st.defeated[id] || !W.canRematch(id)) return;
+      if (Math.abs(n.x - p.x) > 7 || Math.abs(n.y - p.y) > 5) return;
+      if (Math.random() < 0.7) { st.rematch[id] = true; n.skipSight = false; any.push(n); }
+    });
+    if (!any.length) return PK.ui.say('...But nobody nearby answered the call.');
+    for (var i = 0; i < any.length; i++) await W.emote(any[i], '!', 20);
+    await PK.ui.say('Some keepers want a rematch!');
   };
 
   // ---------------- NPC control ----------------
@@ -405,7 +538,7 @@
   W.playerFace = function (d) { W.p.dir = d; };
   W.hideNpc = function (id) { var n = W.npc(id); if (n) n.hidden = true; };
   W.emote = async function (id, ch, frames) {
-    var n = id === 'player' ? W.p : W.npc(id);
+    var n = id === 'player' ? W.p : typeof id === 'object' ? id : W.npc(id);
     if (!n) return;
     n.emote = ch || '!';
     if (PK.audio) PK.audio.sfx('emote');
@@ -486,7 +619,7 @@
       if (!PK.game.count('machete')) return PK.ui.say('A thick bush blocks the way. Something sharp could clear it.');
       if (await PK.ui.yesno('This bush could be cut down. Use the Machete?')) {
         if (PK.audio) PK.audio.sfx('cut');
-        m.tiles[fy][fx] = '.'; W.redrawTile(fx, fy);
+        W.clearTile(fx, fy, '.');
       }
       return;
     }
@@ -495,7 +628,7 @@
       if (await PK.ui.yesno('This rock looks breakable. Use the Pickaxe?')) {
         if (PK.audio) PK.audio.sfx('smash');
         PK.fx.shake(10, 2);
-        m.tiles[fy][fx] = m.enc && m.enc.cave ? '.' : '.'; W.redrawTile(fx, fy);
+        W.clearTile(fx, fy, '.');
       }
       return;
     }
@@ -509,12 +642,21 @@
     }
   };
 
+  // permanently clear an obstacle tile (saved per map)
+  W.clearTile = function (x, y, to) {
+    var st = PK.game.state, id = W.map.id;
+    st.cleared = st.cleared || {};
+    (st.cleared[id] = st.cleared[id] || {})[x + ',' + y] = to;
+    W.map.tiles[y][x] = to;
+    W.redrawTile(x, y);
+  };
+
   W.talk = async function (n) {
     var d = n.d;
     if (!d.noTurn) W.facePlayer(n);
     var st = PK.game.state;
     if (d.keeper) {
-      if (!st.defeated[d.keeper]) return W.keeperBattle(n);
+      if (!st.defeated[d.keeper] || (st.rematch && st.rematch[d.keeper])) return W.keeperBattle(n);
       var tr = PK.TRAINERS[d.keeper];
       return PK.ui.say(tr.after || tr.lose || '...');
     }
@@ -599,8 +741,17 @@
       }
     }
     // player movement
+    // SELECT: tap to use the registered key item, hold (with B or alone) to run
+    if (inp.h('select')) { W.selT = (W.selT || 0) + 1; if (p.moving) W.selMoved = true; }
+    else {
+      if (W.selT > 0 && W.selT < 15 && !W.selMoved && !p.moving && !W.busy && PK.top() === this) {
+        W.busy++; PK.run(W.useRegistered).then(function () { W.busy--; });
+      }
+      W.selT = 0; W.selMoved = false;
+    }
     if (p.moving) {
-      var speed = p.slide ? 2 : (inp.h('select') && !p.scripted && !p.surf) || p.jump ? 2 : 1;
+      var run = (inp.h('select') || inp.h('b')) && !p.scripted && !p.surf;
+      var speed = p.slide ? 2 : p.bike && !p.scripted ? 16 / 6 : run || p.jump ? 2 : 1;
       if (p.jump) speed = 1.34;
       p.t += speed;
       var dist = p.jump ? 2 : 1;

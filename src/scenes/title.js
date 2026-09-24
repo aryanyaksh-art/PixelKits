@@ -35,44 +35,72 @@
   Title.prototype.update = function () {
     this.t++;
     this.clouds.forEach(function (c) { c.x += c.s; if (c.x > PK.W + 40) c.x = -60; });
-    if (this.phase === 'press' && (PK.input.ok() || PK.input.p('a'))) {
+    if (this.phase === 'press' && PK.top() === this && (PK.input.ok() || PK.input.p('a'))) {
       if (PK.audio) { PK.audio.unlock(); PK.audio.music('title'); PK.audio.sfx('select'); }
       this.phase = 'menu';
       var self = this;
       PK.run(function () { return self.menu(); });
     }
   };
+  function slotItems() {
+    var out = [];
+    for (var n = 1; n <= 3; n++) {
+      var inf = PK.game.saveInfo(n);
+      out.push(inf ? { label: 'FILE ' + n + '  ' + inf.name, right: (inf.champion ? '★ ' : '') + inf.crests + ' crests  ' + PK.game.playTime(inf.time) } : { label: 'FILE ' + n + '  - empty -', empty: true });
+    }
+    return out;
+  }
   Title.prototype.menu = async function () {
-    var has = PK.game.hasSave();
-    var info = PK.game.saveInfo();
-    var items = [];
-    if (has) items.push({ label: 'CONTINUE', right: info ? info.name + '  ' + info.crests + ' crests' : '' });
-    items.push({ label: 'NEW GAME' });
-    items.push({ label: 'OPTIONS' });
-    items.push({ label: 'CONTROLS' });
-    var i = await PK.ui.menu(items, { x: 40, y: 96, w: 160, cancel: false });
-    var pick = items[i].label;
-    if (pick === 'CONTINUE') {
-      if (!PK.game.load()) { await PK.ui.say('The save data could not be loaded.'); this.phase = 'press'; return; }
-      if (PK.audio) PK.audio.applyVolumes();
-      await PK.fx.fadeOut(20);
-      await PK.enterWorld();
-      return;
-    }
-    if (pick === 'NEW GAME') {
-      if (has && !(await PK.ui.yesno('Start a new game? Your old save will be overwritten when you save.'))) { this.phase = 'press'; return; }
-      PK.game.newGame();
-      await PK.fx.fadeOut(20);
-      PK.pop(this);
-      PK.push(new Intro());
-      await PK.fx.fadeIn(20);
-      return;
-    }
-    if (pick === 'OPTIONS') { await PK.menus.options(); this.phase = 'press'; return; }
-    if (pick === 'CONTROLS') {
-      await PK.ui.say('Arrow keys or WASD move. Z, Space or J is A (confirm/talk). X, Esc or K is B (back).');
-      await PK.ui.say('Enter or C opens the menu. Hold Shift to run. On phones, use the on-screen buttons.');
-      this.phase = 'press';
+    for (;;) {
+      var has = PK.game.hasSave();
+      var items = [];
+      if (has) items.push({ label: 'CONTINUE' });
+      items.push({ label: 'NEW GAME' });
+      items.push({ label: 'OPTIONS' });
+      items.push({ label: 'CONTROLS' });
+      var i = await PK.ui.menu(items, { x: 60, y: 96, w: 120, cancel: false });
+      var pick = items[i].label;
+      if (pick === 'CONTINUE') {
+        var sl = slotItems();
+        var c = await PK.ui.menu(sl.map(function (x) { return x.empty ? Object.assign({ disabled: true }, x) : x; }), { x: 8, y: 60, w: 224, title: 'Continue which file?' });
+        if (c < 0) continue;
+        var act = await PK.ui.menu(['LOAD', 'DELETE', 'CANCEL'], { right: 232, y: 60 });
+        if (act === 1) {
+          if (await PK.ui.yesno('Delete FILE ' + (c + 1) + ' forever? This cannot be undone.') && await PK.ui.yesno('Are you really sure?')) {
+            PK.game.deleteSlot(c + 1);
+            await PK.ui.say('FILE ' + (c + 1) + ' was deleted.');
+          }
+          continue;
+        }
+        if (act !== 0) continue;
+        if (!PK.game.load(c + 1)) { await PK.ui.say('The save data could not be loaded.'); continue; }
+        if (PK.audio) PK.audio.applyVolumes();
+        await PK.fx.fadeOut(20);
+        await PK.enterWorld();
+        return;
+      }
+      if (pick === 'NEW GAME') {
+        var sl2 = slotItems();
+        var slot = 1;
+        if (has) {
+          var c2 = await PK.ui.menu(sl2, { x: 8, y: 60, w: 224, title: 'Start in which file?' });
+          if (c2 < 0) continue;
+          if (!sl2[c2].empty && !(await PK.ui.yesno('FILE ' + (c2 + 1) + ' already has a save. It will be overwritten the first time you save. OK?'))) continue;
+          slot = c2 + 1;
+        }
+        PK.game.newGame();
+        PK.game.slot = slot;
+        await PK.fx.fadeOut(20);
+        PK.pop(this);
+        PK.push(new Intro());
+        await PK.fx.fadeIn(20);
+        return;
+      }
+      if (pick === 'OPTIONS') { await PK.menus.options(); continue; }
+      if (pick === 'CONTROLS') {
+        await PK.ui.say('Arrow keys or WASD move. Z, Space or J is A (confirm/talk). X, Esc or K is B (back).');
+        await PK.ui.say('Enter or C opens the menu. Hold Shift to run. On phones, use the on-screen buttons.');
+      }
     }
   };
   Title.prototype.draw = function (ctx) {
@@ -186,7 +214,7 @@
       ];
       var st = PK.game.state;
       st.party.forEach(function (k) { lines.push(PK.stats.name(k) + '  Lv' + k.level); });
-      lines = lines.concat(['', '', 'KITLOG', Object.keys(st.caught).length + ' / 100 caught', '', '',
+      lines = lines.concat(['', '', 'KITLOG', Object.keys(st.caught).length + ' / ' + PK.KIT_COUNT + ' caught', '', '',
         'GAME DESIGN, CODE, PIXEL ART & MUSIC', 'Built entirely from scratch', '', '',
         'WARDENS', 'Fenna  Gideon  Juno  Marisol', 'Ignatius  Celestine  Bjorn  Morwen', '', '',
         'HIGH COUNCIL', 'Dax  Hemlock  Orrin  Sable', '', 'CHAMPION EMERITUS', 'Castor', '', '',
@@ -208,7 +236,7 @@
             var big = l === l.toUpperCase() && l.length > 0 && j > 0;
             F().center(ctx, l, PK.W / 2, yy, big ? '#ffd860' : '#e0e4f8', '#000');
           }
-          var id = 1 + Math.floor(this.t / 90) % 100;
+          var id = 1 + Math.floor(this.t / 90) % PK.KIT_COUNT;
           ctx.globalAlpha = 0.9;
           ctx.drawImage(PK.kitArt.get(id, 'front'), 176, 96);
           ctx.globalAlpha = 1;

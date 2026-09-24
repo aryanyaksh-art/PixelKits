@@ -69,6 +69,11 @@
     this.i = 0;
     this.swapFrom = -1;
     this.busy = false;
+    if (this.opts.forced) {
+      var ex = this.opts.exclude || [];
+      var f = PK.game.state.party.findIndex(function (k, j) { return k.hp > 0 && ex.indexOf(j) < 0; });
+      if (f >= 0) this.i = f;
+    }
   }
   Party.prototype.party = function () { return PK.game.state.party; };
   Party.prototype.update = function () {
@@ -102,10 +107,7 @@
       var c = await PK.ui.menu(['SWITCH', 'SUMMARY', 'CANCEL'], { right: 236, bottom: 136 });
       if (c === 0) {
         if (k.hp <= 0) return PK.ui.say(PK.stats.name(k) + ' has no energy left to battle!');
-        var active = PK.top() && false;
-        void active;
-        var bs = PK.scenes.filter(function (s) { return s instanceof PK.BattleScene; })[0];
-        if (bs && bs.b.p.kit() === k && bs.b.p.kit().hp > 0) return PK.ui.say(PK.stats.name(k) + ' is already in battle!');
+        if ((this.opts.exclude || []).indexOf(this.i) >= 0) return PK.ui.say(PK.stats.name(k) + ' is already in battle!');
         return this.finish(this.i);
       }
       if (c === 1) return summary(this.i);
@@ -286,9 +288,12 @@
       return PK.ui.say("That can't be used right now.");
     }
     // field
-    var opts = it.pocket === 'key' ? ['USE', 'CANCEL'] : it.use === 'held' ? ['GIVE', 'TOSS', 'CANCEL'] : it.pocket === 'discs' ? ['USE', 'CANCEL'] : ['USE', 'GIVE', 'TOSS', 'CANCEL'];
+    var registerable = ['bike', 'rallybell', 'seekerlens', 'townmap', 'wayfinder', 'kitlog'].indexOf(id) >= 0;
+    var opts = it.pocket === 'key' ? (registerable ? ['USE', PK.game.state.registered === id ? 'UNREGISTER' : 'REGISTER', 'CANCEL'] : ['USE', 'CANCEL']) : it.use === 'held' ? ['GIVE', 'TOSS', 'CANCEL'] : it.pocket === 'discs' ? ['USE', 'CANCEL'] : ['USE', 'GIVE', 'TOSS', 'CANCEL'];
     var c = await PK.ui.menu(opts, { right: 236, bottom: 118 });
     var act = opts[c];
+    if (act === 'REGISTER') { PK.game.state.registered = id; return PK.ui.say(it.name + ' was registered. Tap SELECT (Shift) to use it.'); }
+    if (act === 'UNREGISTER') { PK.game.state.registered = null; return PK.ui.say(it.name + ' was unregistered.'); }
     if (act === 'TOSS') {
       var n = await PK.ui.number({ min: 1, max: PK.game.count(id), y: 96 });
       if (n > 0 && await PK.ui.yesno('Throw away ' + n + ' ' + it.name + '?')) { PK.game.removeItem(id, n); await PK.ui.say('Threw away the ' + it.name + '.'); }
@@ -330,6 +335,44 @@
       if (it.use === 'revive') { k.hp = Math.max(1, Math.floor(k.stats[0] * it.value / 100)); return PK.ui.say(PK.stats.name(k) + ' was revived!'); }
       if (it.use === 'pp') { k.moves.forEach(function (m) { m.pp = Math.min(PK.MOVES[m.id].pp, m.pp + it.value); }); return PK.ui.say(PK.stats.name(k) + "'s charges were restored!"); }
     }
+    if (it.use === 'tp') {
+      var pi = await PK.menus.party({ mode: 'item' });
+      if (pi < 0) return;
+      var pk = party[pi], stat = it.value;
+      PK.stats.upgrade(pk);
+      if (pk.tp[stat] >= 100) return PK.ui.say("It won't have any effect.");
+      var gained = PK.stats.addTP(pk, stat, Math.min(10, 100 - pk.tp[stat]));
+      if (!gained) return PK.ui.say("It won't have any effect.");
+      PK.game.removeItem(id);
+      PK.stats.recalc(pk);
+      if (PK.audio) PK.audio.sfx('statup');
+      return PK.ui.say(PK.stats.name(pk) + "'s " + PK.STAT_NAMES[stat] + ' training went up!');
+    }
+    if (it.use === 'level') {
+      var li = await PK.menus.party({ mode: 'item' });
+      if (li < 0) return;
+      var lk = party[li];
+      if (lk.level >= 100) return PK.ui.say("It won't have any effect.");
+      PK.game.removeItem(id);
+      var ups = PK.stats.addExp(lk, PK.stats.expFor(lk.level + 1) - lk.exp);
+      if (PK.audio) PK.audio.jingle('levelup');
+      await PK.ui.say(PK.stats.name(lk) + ' grew to Lv. ' + lk.level + '!');
+      for (var u = 0; u < ups.length; u++) {
+        var nm = PK.stats.movesAt(lk.id, ups[u].level);
+        for (var q = 0; q < nm.length; q++) await learnMove(lk, nm[q]);
+      }
+      var evo = PK.stats.evoTarget(lk);
+      if (evo) await PK.menus.evolve(lk, evo);
+      return;
+    }
+    if (it.use === 'exit') {
+      var wm = PK.world.map, lo = PK.game.state.lastOutdoor;
+      if (!(wm.enc && wm.enc.cave) && !wm.dungeon) return PK.ui.say("There's no need to use that here.");
+      if (!lo) return PK.ui.say("It won't work here.");
+      PK.game.removeItem(id);
+      PK.menus.pendingAction = function () { return PK.world.warp(lo.map, lo.x, lo.y, 'down', { sfx: 'stairs' }); };
+      return;
+    }
     if (it.use === 'hush') { PK.game.removeItem(id); PK.game.state.hush = it.value; return PK.ui.say('You sprayed the ' + it.name + '. Wild Kits will keep their distance.'); }
     if (it.use === 'evo') {
       var ei = await PK.menus.party({ mode: 'item' });
@@ -349,6 +392,11 @@
     }
     if (id === 'kitlog') return PK.menus.kitlog();
     if (id === 'wayfinder') { PK.menus.pendingAction = PK.world.fastTravel; return; }
+    if (id === 'bike') { PK.menus.pendingAction = PK.world.toggleBike; return; }
+    if (id === 'rallybell') { PK.menus.pendingAction = PK.world.ringBell; return; }
+    if (id === 'seekerlens') { PK.menus.pendingAction = PK.world.seek; return; }
+    if (id === 'townmap') return PK.menus.townMap();
+    if (id === 'ferrypass') return PK.ui.say('Show this at the Saltmarsh harbor to board the ferry.');
     if (it.pocket === 'key') return PK.ui.say('Face an obstacle and press A to use the ' + it.name + '.');
     if (it.use === 'capsule' || it.use === 'escape') return PK.ui.say('That can only be used in battle.');
   }
@@ -471,20 +519,20 @@
   // ================= KitLog =================
   function KitLog(done) { this.opaque = true; this.done = done; this.i = 0; this.scroll = 0; this.detail = false; }
   KitLog.prototype.update = function () {
-    var inp = PK.input, st = PK.game.state;
+    var inp = PK.input, st = PK.game.state, N = PK.KIT_COUNT;
     if (this.detail) {
       if (inp.cancel() || inp.ok()) { this.detail = false; if (PK.audio) PK.audio.sfx('back'); }
       if (inp.rep('up') || inp.rep('down')) {
         var d = inp.rep('up') ? -1 : 1, j = this.i;
-        for (var q = 0; q < 100; q++) { j = (j + d + 100) % 100; if (st.seen[j + 1]) break; }
+        for (var q = 0; q < N; q++) { j = (j + d + N) % N; if (st.seen[j + 1]) break; }
         this.i = j;
       }
       return;
     }
-    if (inp.rep('up')) this.i = (this.i + 99) % 100;
-    if (inp.rep('down')) this.i = (this.i + 1) % 100;
+    if (inp.rep('up')) this.i = (this.i + N - 1) % N;
+    if (inp.rep('down')) this.i = (this.i + 1) % N;
     if (inp.rep('left')) this.i = Math.max(0, this.i - 8);
-    if (inp.rep('right')) this.i = Math.min(99, this.i + 8);
+    if (inp.rep('right')) this.i = Math.min(N - 1, this.i + 8);
     if (this.i < this.scroll) this.scroll = this.i;
     if (this.i >= this.scroll + 11) this.scroll = this.i - 10;
     if (inp.ok() && st.seen[this.i + 1]) { this.detail = true; if (PK.audio) { PK.audio.sfx('select'); PK.audio.cry(this.i + 1); } }
@@ -694,6 +742,7 @@
     storage: storage,
     options: options,
     useField: useField,
+    townMap: function (o) { return PK.townMap(o); },
     // Start menu from the overworld
     start: async function () {
       var st = PK.game.state;
@@ -702,6 +751,7 @@
         var items = [];
         var acts = [];
         if (PK.game.count('kitlog')) { items.push('KITLOG'); acts.push('log'); }
+        if (PK.game.count('townmap')) { items.push('MAP'); acts.push('map'); }
         if (st.party.length) { items.push('KITS'); acts.push('kits'); }
         items.push('BAG'); acts.push('bag');
         items.push(st.player.name); acts.push('card');
@@ -714,6 +764,7 @@
         idx = i;
         var a = acts[i];
         if (a === 'log') await PK.menus.kitlog();
+        if (a === 'map') await PK.menus.townMap();
         if (a === 'kits') await PK.menus.party({ mode: 'field' });
         if (a === 'bag') await PK.menus.bag({ mode: 'field' });
         if (PK.menus.pendingAction) { var pa = PK.menus.pendingAction; PK.menus.pendingAction = null; await pa(); return; }
@@ -722,7 +773,7 @@
         if (a === 'debug') { await PK.debugMenu(); return; }
         if (a === 'save') {
           var info = 'Crests: ' + PK.game.crestCount() + '  KitLog: ' + Object.keys(st.caught).length + '  Time: ' + PK.game.playTime();
-          if (await PK.ui.yesno('Save your progress?  ' + info)) {
+          if (await PK.ui.yesno('Save your progress to FILE ' + PK.game.slot + '?  ' + info)) {
             if (PK.world) PK.world.syncPlayer();
             var ok = PK.game.save();
             if (PK.audio) PK.audio.jingle('save');

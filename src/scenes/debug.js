@@ -107,12 +107,13 @@
         calm = 0;
         if (PK.top().constructor.name === 'NameEntry') { await PK.test.press('start'); await PK.test.step(10); continue; }
         if (PK.top().constructor.name === 'Party' && PK.top().opts.forced) {
-          var pt = PK.top(); pt.i = PK.game.state.party.findIndex(function (k) { return k.hp > 0; });
+          var pt = PK.top(); pt.i = PK.game.state.party.findIndex(function (k, j) { return k.hp > 0 && (pt.opts.exclude || []).indexOf(j) < 0; });
           await PK.test.press('a'); await PK.test.step(8); await PK.test.press('a'); await PK.test.step(20); continue;
         }
         var b = PK.test.battle();
+        if (b && (b.mode === 'target' || b.mode === 'safari')) { await PK.test.press('a'); await PK.test.step(20); continue; }
         if (b && b.mode === 'action') {
-          var km = b.b.p.kit().moves, best = 0, bp = -1;
+          var km = b.actor.kit().moves, best = 0, bp = -1;
           km.forEach(function (m, j) { var p = m.pp > 0 ? PK.MOVES[m.id].power : -1; if (p > bp) { bp = p; best = j; } });
           b.moveCursor = best; b.cursor = 0;
           await PK.test.press('a'); await PK.test.step(4); await PK.test.press('a'); await PK.test.step(20); continue;

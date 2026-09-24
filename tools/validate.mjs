@@ -18,7 +18,8 @@ const PK = loadGame();
 
 // ---- kits / moves / items
 const kitIds = Object.keys(PK.KITS).map(Number);
-if (kitIds.length !== 100) err('expected 100 Kits, got', kitIds.length);
+if (kitIds.length < 100) err('expected at least 100 Kits, got', kitIds.length);
+kitIds.forEach((id, i) => { if (+id !== i + 1) err('Kit ids must be consecutive from 1; found', id); });
 for (const id of kitIds) {
   const k = PK.KITS[id];
   k.types.forEach(t => { if (!PK.TYPES[t]) err('kit', id, 'bad type', t); });
@@ -125,6 +126,7 @@ const reachedMaps = new Set();
 while (q.length) {
   const [mid, x, y] = q.shift();
   const m = PK.MAPS[mid];
+  if (!reachedMaps.has(mid)) (m.links || []).forEach(l => { if (PK.MAPS[l[0]]) q.push([l[0], l[1], l[2]]); });
   reachedMaps.add(mid);
   const push = (a, nx, ny) => { const k = key(a, nx, ny); if (!seen.has(k)) { seen.add(k); q.push([a, nx, ny]); } };
   // warps from this tile

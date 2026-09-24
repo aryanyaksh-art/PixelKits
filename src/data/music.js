@@ -24,6 +24,21 @@
     'o3 f4 o4 c4 o3 a4 o4 c4 | o3 c4 g4 e4 g4 | o3 d4 a4 f4 a4 | o3 f4 o4 c4 o3 f4 r4 | o3 f4 a4 o4 c4 o3 a4 | o3 b-4 o4 f4 o3 c4 g4 | o3 d4 a4 c4 g4 | o3 f4 o4 c4 o3 f4 r4',
     'v6 [k4 h8 h8 s4 h8 h8]8');
 
+  T('bike', 152,
+    '@2 v12 o5 a8 a8 o6 c+8 e8 d4 c+8 o5 b8 | o5 a8 b8 o6 c+8 d8 e4 r8 e8 | o6 f+8 e8 d8 c+8 o5 b4 a8 b8 | o6 c+2 o5 a4 r4 | o5 f+8 a8 o6 d8 f+8 e4 d8 c+8 | o5 b8 o6 c+8 d8 e8 f+4 e4 | o6 d8 c+8 o5 b8 a8 g+4 b4 | o5 a2. r4',
+    'o3 a4 o4 e4 o3 a4 o4 e4 | o3 a4 o4 e4 c+4 e4 | o3 d4 a4 f+4 a4 | o3 a4 o4 e4 o3 a4 r4 | o3 d4 a4 f+4 a4 | o3 e4 b4 g+4 b4 | o3 d4 a4 e4 b4 | o3 a4 o4 e4 o3 a4 r4',
+    'l8 v8 [k h s h k k s h]8');
+
+  T('safari', 116,
+    '@1 v11 o5 c8 f8 a8 f8 g4 e4 | o5 f8 g8 a8 b-8 a4 f4 | o5 d8 f8 b-8 a8 g4 f8 e8 | o5 f2 c4 r4 | o5 a8 b-8 o6 c8 o5 a8 b-4 g4 | o5 a8 g8 f8 g8 a4 f4 | o5 g8 a8 b-8 g8 e4 g4 | o5 f2. r4',
+    'o3 f4 o4 c4 o3 a4 o4 c4 | o3 f4 o4 c4 o3 f4 a4 | o3 b-4 o4 f4 o3 c4 g4 | o3 f4 o4 c4 o3 f4 r4 | o3 f4 a4 b-4 g4 | o3 f4 o4 c4 o3 f4 a4 | o3 c4 g4 e4 g4 | o3 f4 o4 c4 o3 f4 r4',
+    'v6 [k8 h8 s8 h8 k8 k8 s8 h8]8');
+
+  T('island', 104,
+    '@2 v11 o5 e8 g4 e8 a4 g4 | o5 f8 a4 f8 g2 | o5 e8 g4 o6 c8 o5 b4 a4 | o5 g2. r4 | o5 a8 o6 c4 o5 a8 g4 e4 | o5 f8 a4 f8 e4 d4 | o5 e8 g4 e8 d4 e4 | o5 c2. r4',
+    'o3 c4 g8 c8 e4 g4 | o3 f4 o4 c8 o3 f8 g4 b4 | o3 c4 g8 c8 a4 f4 | o3 g4 d8 g8 b4 r4 | o3 f4 o4 c8 o3 f8 a4 c4 | o3 d4 a8 d8 g4 b4 | o3 c4 g8 e8 g4 b4 | o3 c4 g8 c8 c4 r4',
+    'v6 [k8 h8 h8 s8 h8 k8 s8 h8]8');
+
   T('route', 132,
     '@2 v12 o5 g8 g8 a8 b8 o6 d4 o5 b8 g8 | o5 a8 a8 b8 o6 c8 d4 o5 a4 | o5 b8 o6 d8 e8 d8 o5 b4 g8 a8 | o5 b4 a4 g4 r4 | o5 e8 g8 a8 b8 o6 c4 o5 b8 a8 | o5 g8 a8 b8 o6 d8 e4 d4 | o6 c8 o5 b8 a8 b8 o6 c4 o5 a4 | o5 g2. r4',
     'o3 g4 o4 d4 o3 b4 o4 d4 | o3 d4 a4 f+4 a4 | o3 e4 b4 g4 b4 | o3 d4 a4 d4 r4 | o3 c4 g4 e4 g4 | o3 g4 o4 d4 o3 e4 b4 | o3 a4 o4 e4 o3 d4 a4 | o3 g4 o4 d4 o3 g4 r4',

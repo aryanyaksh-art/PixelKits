@@ -24,7 +24,7 @@
       'TT' + Q(7) + '.::.' + Q(6) + '*TT',
       'TT' + Q(7) + '.::.' + Q(7) + 'TT',
       'TT' + Q(3) + 'o' + Q(3) + '.::.' + Q(7) + 'TT',
-      'TT........::........TT',
+      'TT........::...mn...TT',
       'TTTT....S.::.....TTTTT',
       'TT~~~~....::.....~~TTT',
       'TT~~~~..s.::......~TTT',
@@ -38,7 +38,9 @@
       a: { sprite: 'skier', dir: 'right', keeper: 'frost_1', sight: 2 },
       e: { sprite: 'skier', dir: 'left', keeper: 'frost_2', sight: 4 },
       o: { sprite: 'brawler', dir: 'right', keeper: 'frost_4', sight: 4 },
-      s: { sprite: 'oldman', dir: 'right', keeper: 'frost_3', sight: 2 }
+      s: { sprite: 'oldman', dir: 'right', keeper: 'frost_3', sight: 2 },
+      m: { sprite: 'skier', dir: 'left', keeper: 'frost_duo', sight: 3 },
+      n: { sprite: 'skier', dir: 'left', keeper: 'frost_duo', sight: 3 }
     },
     edges: { s: { to: 'mirage_city', off: 4 }, n: { to: 'rimeholt', off: 0 } },
     enc: {
@@ -52,8 +54,8 @@
     name: 'Rimeholt', theme: 'snow', music: 'snow', region: 'Frostcrown Highlands', weather: 'snow',
     rows: [
       'WWWWWWWWWWWWWWWWWWWWWWWW',
-      'WWWWWWWWWWOWWWWWWWWWWWWW',
-      'TT........:...........TT',
+      'WWWWWWWWWWOWWWWWWWOWWWWW',
+      'TT........:.......e...TT',
       'TT.1######:...2####...TT',
       'TT.#######:...#####...TT',
       'TT.#######:...#####...TT',
@@ -75,8 +77,8 @@
       { k: 'shop', to: 'rh_shop' },
       { k: 'house', to: 'rh_house', roof: '#8a6a4a' }
     ],
-    warps: [['frozen_depths', 9, 15, 'up']],
-    npcs: { a: { sprite: 'oldwoman', move: 'wander', text: 'Warden Bjorn\'s gym floor is pure ice. Once you start sliding, you can\'t stop!' } },
+    warps: [['frozen_depths', 9, 15, 'up'], ['glacier_grotto', 11, 12, 'up']],
+    npcs: { e: { sprite: 'skier', dir: 'down', hideIf: 'champion', text: 'The Glacier Grotto is sealed. Only the League Champion may enter.' }, a: { sprite: 'oldwoman', move: 'wander', text: 'Warden Bjorn\'s gym floor is pure ice. Once you start sliding, you can\'t stop!' } },
     edges: { s: { to: 'frostpine_trail', off: 0 } }
   });
   IN('rh_clinic', 'clinic', { name: 'Rimeholt Clinic' });

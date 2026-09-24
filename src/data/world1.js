@@ -56,7 +56,7 @@
   });
   IN('bh_house', 'house', {
     name: "{RIVAL}'s House",
-    people: [{ x: 5, y: 3, sprite: 'girl', move: 'look', text: 'My little sibling {RIVAL} left for the lab before breakfast. Always in a hurry!', textIf: [['rival_left', '{RIVAL} left on a journey? They never even said goodbye! Please look out for them.']] }]
+    people: [{ x: 5, y: 3, sprite: 'girl', move: 'look', talk: PK.story.gift('got_townmap', 'townmap', "You're off on a journey too? Then you'll need this! It's a Lumora Map. It shows where you are anywhere in the region.", 'Open the map from the menu (MAP). {RIVAL} left without one, of course...', function () { return PK.game.flag('starter'); }, 'My little sibling {RIVAL} left for the lab before breakfast. Always in a hurry!') }]
   });
   D('bh_lab', {
     name: 'Vale Lab', interior: true, theme: 'lab', music: 'hometown',
@@ -161,7 +161,7 @@
     },
     edges: { s: { to: 'willow_trail', off: 0 }, e: { to: 'mossy_woods', off: -4 } }
   });
-  IN('pc_clinic', 'clinic', { name: 'Pinecrest Clinic', people: [{ x: 8, y: 5, sprite: 'boy', move: 'wander', text: 'The terminal in the corner lets you store extra Kits. Handy!' }] });
+  IN('pc_clinic', 'clinic', { name: 'Pinecrest Clinic', people: [{ x: 8, y: 5, sprite: 'boy', move: 'wander', text: 'The terminal in the corner lets you store extra Kits. Handy!' }, { x: 1, y: 3, sprite: 'scholar', dir: 'right', talk: PK.story.gift('got_lens', 'seekerlens', "I'm one of Prof. Vale's aides! You've caught 10 kinds of Kits? Then take this Seeker Lens. It glows when something is hidden nearby.", 'Use the Seeker Lens from your Bag. Items are often hidden in odd corners!', function () { return Object.keys(PK.game.state.caught).length >= 10; }, "I'm one of Prof. Vale's aides. Catch 10 kinds of Kits and I'll give you a handy tool!") }] });
   IN('pc_shop', 'shop', { name: 'Pinecrest Shop', stock: ['capsule', 'tonic', 'remedy', 'hushspray'] });
   IN('pc_woodcutter', 'house', { name: "Woodcutter's House", people: [{ x: 5, y: 3, sprite: 'hiker', dir: 'down', talk: S('pc_woodcutter') }] });
   IN('pc_house', 'house2', { name: 'Cozy House', items: [], people: [{ x: 3, y: 2, sprite: 'girl', dir: 'down', talk: PK.story.gift('got_healroot', 'healroot', 'You look like you travel a lot. Take this Healroot! Let a Kit hold it in battle.', 'A Kit holding a Healroot eats it when its HP gets low.') }] });
@@ -198,7 +198,7 @@
     rows: [
       'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
       'TTT""""TTTTT""""TTTTTT"""*TTTT',
-      'TTT""""...TT""""..a...""""TTTT',
+      'TTT""""mn.TT""""..a...""""TTTT',
       ':::::::::::::::::::::..""TTTTT',
       'TTT""""TT..TT""""TT..:..TTTTTT',
       'TTT""""TT..TT""""TT..:.""TTTTT',
@@ -211,9 +211,9 @@
       'TT""""""o""""TTTTTTTTTTT.TTTTT',
       'TT"""""""""""TTTTTTTTTTT.TTTTT',
       'TTTTTTT.TTTTTTTTTTTTTTTT.TTTTT',
-      'TTTTTTT.TTTTTTTT""""""TT.TTTTT',
+      'TTTTTTTrTTTTTTTT""""""TT.TTTTT',
       'TTTTTTT?TTTTTTTT""q"""TT.TTTTT',
-      'TTTTTTTTTTTTTTTT""""""..:TTTTT',
+      'TTTTTTTOTTTTTTTT""""""..:TTTTT',
       'TTTTTTTTTTTTTTTT""""""..!!::::',
       'TTTTTTTTTTTTTTTTTTTTTT..TTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTT.uTTTTTT',
@@ -226,10 +226,13 @@
       e: { sprite: 'kid', dir: 'left', keeper: 'woods_2', sight: 1 },
       o: { sprite: 'boy', dir: 'right', keeper: 'woods_4', sight: 4 },
       q: { sprite: 'girl', dir: 'up', keeper: 'woods_3', sight: 2 },
+      m: { sprite: 'girl', dir: 'down', keeper: 'woods_twins', sight: 1 },
+      n: { sprite: 'girl', dir: 'down', keeper: 'woods_twins', sight: 1 },
       u: { id: 'rival', sprite: 'rival', dir: 'up', hideIf: 'rival2', talk: S('rival2') }
     },
     events: [{ run: 'rival2', cond: function () { return !PK.game.flag('rival2'); } }, { run: 'rival2', cond: function () { return !PK.game.flag('rival2'); } }],
     edges: { w: { to: 'pinecrest', off: 4 }, e: { to: 'quarryton', off: -6 } },
+    warps: [['hidden_hollow', 9, 10, 'up']],
     enc: {
       grass: [[14, 5, 7, 25], [15, 6, 8, 10], [21, 6, 8, 15], [19, 6, 8, 15], [10, 6, 8, 10], [46, 7, 9, 8], [62, 7, 8, 8], [60, 6, 8, 9, 'night'], [77, 7, 7, 5, 'morning'], [16, 8, 9, 2]]
     }
@@ -274,8 +277,8 @@
     },
     edges: { w: { to: 'mossy_woods', off: 6 } }
   });
-  IN('qt_clinic', 'clinic', { name: 'Quarryton Clinic' });
-  IN('qt_shop', 'shop', { name: 'Quarryton Shop', stock: ['capsule', 'tonic', 'remedy', 'rekindle', 'hushspray', 'smokepellet'] });
+  IN('qt_clinic', 'clinic', { name: 'Quarryton Clinic', people: [{ x: 8, y: 5, sprite: 'boy', dir: 'left', talk: PK.story.gift('got_bike', 'bike', "Whoa, the Bedrock Crest! My family runs a cycle shop, and we'd love a strong keeper to ride our bikes. Here's a Trail Bike!", 'Use the Trail Bike from your Bag, or register it to SELECT. It is way faster than running!', function () { return PK.game.state.crests[1]; }, 'I love bikes! Beat Warden Gideon here in Quarryton and I might have something for you.') }] });
+  IN('qt_shop', 'shop', { name: 'Quarryton Shop', stock: ['capsule', 'tonic', 'remedy', 'rekindle', 'hushspray', 'smokepellet', 'exitcord'] });
   IN('qt_miner', 'house', { name: "Miner's House", people: [{ x: 5, y: 3, sprite: 'worker', dir: 'down', talk: S('qt_miner') }] });
   D('qt_gym', {
     name: 'Quarryton Gym', interior: true, theme: 'gym_Terra', music: 'town',

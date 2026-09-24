@@ -15,9 +15,9 @@
       'TT""""".....::...T~~~~',
       'TT""""".....:....T~~~~',
       'TT"""""..a..:.....~~~~',
-      'TT..........:.....~~~~',
-      'TTTT""""....:..*..~~~~',
-      'TTTT""""....:.....~~~~',
+      'TT..........:.mn..~~~~',
+      'TTTT1##"....:..*..~~~~',
+      'TTTT###"....:.....~~~~',
       'TT,,,,......::::..~~~~',
       'TT....S........:..~~~~',
       'TTvvvvvvvvv....:..~~~~',
@@ -39,12 +39,15 @@
       'TTTTTTTTTTT:TTTTTTTTTT'
     ],
     signs: ['TIDEWIND TRAIL - North: Voltmere  South: Saltmarsh'],
+    buildings: [{ k: 'gate', to: 'wildwood_gate', label: 'RESERVE' }],
     items: [['hitonic', 2], ['sd18', 1]],
     npcs: {
       a: { sprite: 'girl', dir: 'right', keeper: 'tide_1', sight: 3 },
       e: { sprite: 'sailor', dir: 'left', keeper: 'tide_2', sight: 3 },
       q: { sprite: 'swimmer', dir: 'left', keeper: 'tide_3', sight: 3 },
       s: { sprite: 'girl', dir: 'right', keeper: 'tide_4', sight: 4 },
+      m: { sprite: 'boy', dir: 'left', keeper: 'tide_duo', sight: 2 },
+      n: { sprite: 'girl', dir: 'left', keeper: 'tide_duo', sight: 2 },
       h: { sprite: 'kit:98', cond: champ('g98'), talk: PK.story.guardian(98, 60, 'g98', 'A great ray glides above the waves. Rain begins to fall...') }
     },
     edges: { n: { to: 'voltmere', off: 0 }, s: { to: 'saltmarsh', off: 0 } },
@@ -66,7 +69,7 @@
       'TT.#######.:.#####....~~~~',
       'TT.#######.:...:......~~~~',
       'TT....:....:::::......~~~~',
-      'TT....::::::::::::::::==~~',
+      'TT....::::::::::::::::=h~~',
       'TT.3###..:.......4###..~~~',
       'TT.####..:.......####..~~~',
       'TT.####..:.......####..~~~',
@@ -85,13 +88,15 @@
     ],
     signs: ['SALTMARSH - Salt, sails and sea breeze. East across the bay: Sunscar Dunes'],
     npcs: {
+      h: { sprite: 'sailor', dir: 'left', talk: 'ferry_saltmarsh' },
       a: { sprite: 'sailor', dir: 'left', text: 'The Sunscar Dunes are just across the bay. You\'d need a Raft to get there, though.', textIf: [['got_raft', 'Got a Raft? Face the water and press A. Easy as that!']] },
       e: { sprite: 'boy', move: 'wander', text: 'Warden Marisol\'s Tide Kits are slippery. Volt and Leaf moves hit them hard!' }
     },
     edges: { n: { to: 'tidewind_trail', off: 0 }, e: { to: 'sunscar_dunes', off: 0 } },
+    links: [['emberisle', 12, 15]],
     enc: { water: [[27, 20, 24, 40], [33, 20, 23, 30], [48, 21, 24, 20], [64, 21, 24, 10]] }
   });
-  IN('sm_clinic', 'clinic', { name: 'Saltmarsh Clinic' });
+  IN('sm_clinic', 'clinic', { name: 'Saltmarsh Clinic', people: [{ x: 8, y: 5, sprite: 'brawler', dir: 'left', talk: PK.story.gift('got_bell', 'rallybell', 'Four crests! You must love battling as much as I do. Take this Rally Bell! Ring it and keepers you beat before will want a rematch.', 'The Rally Bell needs 100 steps to recharge between rings. You can register it to SELECT!', function () { return PK.game.state.crests[3]; }, "I run a battle club. Earn the Wave Crest here in Saltmarsh and I'll give you something great.") }] });
   IN('sm_shop', 'shop', { name: 'Saltmarsh Shop', stock: ['capsule', 'pluscapsule', 'hitonic', 'remedy', 'rekindle', 'hushspray', 'chargecell', 'sd20'] });
   IN('sm_sailor', 'house', { name: "Sailor's House", people: [{ x: 5, y: 3, sprite: 'sailor', dir: 'down', talk: S('sm_sailor') }] });
   D('sm_gym', {
@@ -137,7 +142,7 @@
       '~~~..""""":"""""""T.......WWWW',
       '~~~..""""":"""""""T.......WWWW',
       '~~~..""""":""q""""T...*...WWWW',
-      '~~~.......:...............WWWW',
+      '~~~.......:...mn..........WWWW',
       '~~~.......:::::::::.......WWWW',
       '~~~..T............:....T..WWWW',
       '~~~....s..........:.......WWWW',
@@ -152,7 +157,9 @@
       a: { sprite: 'hiker', dir: 'down', keeper: 'dune_1', sight: 3 },
       e: { sprite: 'mystic', dir: 'left', keeper: 'dune_2', sight: 3 },
       q: { sprite: 'boy', dir: 'right', keeper: 'dune_3', sight: 4 },
-      s: { sprite: 'girl', dir: 'right', keeper: 'dune_4', sight: 5 }
+      s: { sprite: 'girl', dir: 'right', keeper: 'dune_4', sight: 5 },
+      m: { sprite: 'hiker', dir: 'down', keeper: 'dune_duo', sight: 1 },
+      n: { sprite: 'hiker', dir: 'down', keeper: 'dune_duo', sight: 1 }
     },
     edges: { w: { to: 'saltmarsh', off: 0 }, e: { to: 'dunespire', off: 2 } },
     enc: {
@@ -310,7 +317,7 @@
     edges: { n: { to: 'frostpine_trail', off: -4 } }
   });
   IN('mc_clinic', 'clinic', { name: 'Mirage Clinic' });
-  IN('mc_shop', 'shop', { name: 'Mirage Mega Shop', stock: ['capsule', 'pluscapsule', 'procapsule', 'hitonic', 'megatonic', 'remedy', 'rekindle', 'chargecell', 'hushspraymax', 'sd01', 'sd08', 'sd12', 'sd19', 'voltshard', 'frostshard', 'radiantshard', 'umbralshard'] });
+  IN('mc_shop', 'shop', { name: 'Mirage Mega Shop', stock: ['capsule', 'pluscapsule', 'procapsule', 'hitonic', 'megatonic', 'remedy', 'rekindle', 'chargecell', 'hushspraymax', 'exitcord', 'vigorroot', 'mightroot', 'guardroot', 'focusroot', 'calmroot', 'swiftroot', 'sd01', 'sd08', 'sd12', 'sd19', 'voltshard', 'frostshard', 'radiantshard', 'umbralshard'] });
   IN('mc_house1', 'house', { name: "Scholar's House", people: [{ x: 5, y: 3, sprite: 'scholar', dir: 'down', talk: PK.story.gift('got_powerband', 'powerband', 'A traveling keeper! My research is done, so take this Power Band. It boosts the holder\'s attacks.', 'Power Band gives a 10% boost. Small, but it adds up!') }] });
   IN('mc_house2', 'house2', { name: 'Collector\'s House', people: [{ x: 3, y: 2, sprite: 'oldwoman', dir: 'down', talk: PK.story.gift('got_umbral', 'umbralshard', 'I collect shards, but I have two of these. Here, take an Umbral Shard!', 'Umbral Shards make certain shadowy Kits evolve.') }] });
   D('mc_gym', {

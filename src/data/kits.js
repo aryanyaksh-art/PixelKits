@@ -115,6 +115,18 @@
   K(99, 'Rimewyrm', ['Frost', 'Wyrm'], 3, null, 'mixed', 'legend', 'Snow Guardian', { p: 'dragon', c: ['#a8d8f0', '#4a6ad0', '#f0faff'], horn: 'back', hc: '#e8f8ff', wing: 'bat', wc: '#c8ecff', top: 'crystal', eye: 'fierce', mouth: 'fang', x: ['spikes', 'claws'], s: 1.05 }, 'The guardian of snow. Every winter begins with a single breath from its jaws.');
   K(100, 'Lumikit', ['Lumen', 'Mind'], 2, null, 'mixed', 'myth', 'Origin Kit', { p: 'quad', c: ['#f4f0ff', '#c890f0', '#ffffff'], ear: 'point', tail: 'curl', top: 'halo', gc: '#fff0a0', eye: 'big', x: ['gem', 'cheeks'], cc: '#f0a8ff', s: 0.7 }, 'A tiny Kit made of starlight. Some believe every Kit in Lumora descends from it.');
 
+  // ---- Moonlit Isles (post-game) ----
+  K(101, 'Corallet', ['Tide', 'Lumen'], 1, L(102, 40), 'bal', 'b1', 'Coral Pup', { p: 'quad', c: ['#f08aa0', '#f8d0a0', '#fff0f0'], ear: 'round', tail: 'fluffy', top: 'crystal', cc: '#ffb0c8', eye: 'big', x: ['cheeks'] }, 'Tiny coral branches grow on its back. It plays in warm tide pools all day.');
+  K(102, 'Reefwarden', ['Tide', 'Lumen'], 2, null, 'tank', 'b2', 'Reef Sentinel', { p: 'quad', big: 1, c: ['#d86080', '#f8c890', '#ffe8e8'], ear: 'round', tail: 'fluffy', top: 'crystal', cc: '#ffa0c0', x: ['mane', 'claws'], eye: 'fierce' }, 'It guards whole reefs. Fish hide in the coral forest that grows on its shoulders.');
+  K(103, 'Sootling', ['Blaze', 'Shade'], 1, L(104, 38), 'fast', 'b1', 'Soot Sprite', { p: 'ghost', c: ['#3a3440', '#f07030', '#6a6070'], eye: 'glow', gc: '#ffb040', top: 'flame', mouth: 'grin', s: 0.58 }, 'It is born from the smoke of volcanic vents. It giggles whenever something catches fire.');
+  K(104, 'Ashwing', ['Blaze', 'Shade'], 2, null, 'fast', 'b2', 'Ash Bat', { p: 'dragon', c: ['#2e2834', '#f06a2a', '#5a5064'], wing: 'bat', wc: '#503a3a', horn: 'back', hc: '#f0a060', eye: 'glow', gc: '#ffc040', tail: 'flame', s: 0.9 }, 'It circles volcano peaks on hot updrafts. Ash falls wherever its shadow passes.');
+  K(105, 'Moonhop', ['Mind'], 1, L(106, 36, 'night'), 'spec', 'b1', 'Moon Hare', { p: 'biped', c: ['#d8d8f0', '#8a78c8', '#ffffff'], ear: 'long', top: 'star', gc: '#fff4c0', eye: 'big', x: ['cheeks'], s: 0.6 }, 'It hops in circles under the full moon. Some say it can hear dreams.');
+  K(106, 'Moonstrider', ['Mind', 'Gale'], 2, null, 'spec', 'b2', 'Moon Strider', { p: 'biped', c: ['#c0c0e8', '#5a48a8', '#f8f8ff'], ear: 'long', top: 'halo', gc: '#e8e8ff', eye: 'fierce', x: ['scarf'], feet: 1, s: 0.92 }, 'It leaps from cliff to cliff on moonlit nights. Its footsteps make no sound at all.');
+  K(107, 'Anchorab', ['Tide', 'Metal'], 2, null, 'tank', 'rare', 'Anchor Crab', { p: 'golem', c: ['#6a7a90', '#e0a040', '#c8d0dc'], eye: 'fierce', mouth: 'fang', x: ['spikes'], s: 0.85 }, 'It carries an old ship anchor as a shell. Nothing can move it once it digs in.');
+  K(108, 'Voltpike', ['Volt', 'Tide'], 2, null, 'fast', 'rare', 'Volt Pike', { p: 'fish', c: ['#f0d040', '#2a6ab0', '#fff8d0'], eye: 'fierce', mouth: 'fang', top: 'bolt', s: 0.9 }, 'It stuns prey with bursts of electricity. Nets near its home keep catching fire.');
+  K(109, 'Brambrake', ['Leaf', 'Wyrm'], 2, null, 'phys', 'rare', 'Briar Drake', { p: 'dragon', c: ['#4a8a3a', '#a0402a', '#c8e0a0'], wing: 'bat', wc: '#6aa04a', horn: 'antler', hc: '#8a5a30', x: ['leaves', 'claws'], tail: 'leaf', eye: 'fierce', mouth: 'fang', s: 0.9 }, 'Thorny vines wrap its body like armor. Old forests grow wild wherever it naps.');
+  K(110, 'Moonveil', ['Shade', 'Lumen'], 3, null, 'mixed', 'legend', 'Moon Guardian', { p: 'ghost', c: ['#383060', '#e8e0ff', '#8a80c0'], eye: 'glow', gc: '#f8f0ff', top: 'halo', horn: 'back', hc: '#f0ecff', x: ['mane'], wing: 'bird', wc: '#d0c8f0', s: 1.05 }, 'The guardian of the moon. It watches over the isles and only appears to those who protect its shrine.');
+
   // ---------- stats ----------
   var BST = { st1: 315, st2: 410, st3: 530, e1: 255, e2: 420, b1: 310, b2: 480, bug1: 200, bug2: 285, bug3: 420, ps1: 300, ps2: 420, ps3: 600, single: 455, rare: 500, legend: 620, myth: 600 };
   var CATCH = { st1: 45, st2: 45, st3: 45, e1: 255, e2: 120, b1: 190, b2: 75, bug1: 255, bug2: 120, bug3: 45, ps1: 45, ps2: 30, ps3: 15, single: 90, rare: 45, legend: 3, myth: 3 };
@@ -133,7 +145,7 @@
   };
   function tier(p) { return p <= 45 ? 1 : p <= 70 ? 2 : p <= 90 ? 3 : 4; }
   var SIG = {};
-  var SIGS = { 3: ['grovewrath', 36], 6: ['infernohorn', 36], 9: ['maelstrom', 36], 97: ['sunfire', 1], 98: ['monsoon', 1], 99: ['glacialfang', 1], 100: ['pixelburst', 1] };
+  var SIGS = { 110: ['voidrend', 1], 109: ['frondslash', 40], 94: ['palmblast', 38], 32: ['chiburst', 45], 3: ['grovewrath', 36], 6: ['infernohorn', 36], 9: ['maelstrom', 36], 97: ['sunfire', 1], 98: ['monsoon', 1], 99: ['glacialfang', 1], 100: ['pixelburst', 1] };
 
   function buildLearnset(k) {
     var r = PK.seeded(PK.hash('learn' + k.name));

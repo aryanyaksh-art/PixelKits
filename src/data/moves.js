@@ -1,7 +1,7 @@
 // Original move list. Columns: key, name, type, category (P=physical, T=technique, S=status),
 // power, accuracy (0 = never misses), charges, effect, priority, description
 // Effect grammar: 'brn:10' status chance | 'self:atk+1,spd+1' | 'foe:def-1' (optional ':chance' via '@30')
-// 'heal:50' | 'drain:50' | 'recoil:25' | 'flinch:30' | 'conf:20' | 'multi:2-5' | 'crit' | 'rest' | 'guard' | 'clear' | 'lvl'
+// ';spread' hits every foe in double battles | 'heal:50' | 'drain:50' | 'recoil:25' | 'flinch:30' | 'conf:20' | 'multi:2-5' | 'crit' | 'rest' | 'guard' | 'clear' | 'lvl'
 (function () {
   'use strict';
   var PK = window.PK = window.PK || {};
@@ -16,7 +16,7 @@
     ['headlong', 'Headlong', 'Plain', 'P', 100, 85, 10, 'recoil:25', 0, 'A reckless charge. Hurts the user a little.'],
     ['crowncrash', 'Crown Crash', 'Plain', 'P', 120, 90, 5, 'recoil:33', 0, 'An all-out crash that also hurts the user.'],
     ['sonichum', 'Sonic Hum', 'Plain', 'T', 55, 100, 25, 'conf:10', 0, 'A buzzing hum. May confuse.'],
-    ['echoblast', 'Echo Blast', 'Plain', 'T', 90, 100, 10, '', 0, 'A blast of pure, booming sound.'],
+    ['echoblast', 'Echo Blast', 'Plain', 'T', 90, 100, 10, 'spread', 0, 'A blast of pure, booming sound.'],
     ['glower', 'Glower', 'Plain', 'S', 0, 100, 30, 'foe:def-1', 0, 'A hard stare that lowers Defense.'],
     ['pout', 'Pout', 'Plain', 'S', 0, 100, 30, 'foe:atk-1', 0, 'A sad pout that lowers Attack.'],
     ['puffup', 'Puff Up', 'Plain', 'S', 0, 0, 30, 'self:def+1', 0, 'Puffs up to raise Defense.'],
@@ -33,7 +33,7 @@
     ['scorchgust', 'Scorch Gust', 'Blaze', 'T', 70, 95, 15, 'brn:10', 0, 'A gust of searing wind.'],
     ['blazeburst', 'Blaze Burst', 'Blaze', 'T', 90, 100, 15, 'brn:10', 0, 'A bursting stream of flame.'],
     ['kilncharge', 'Kiln Charge', 'Blaze', 'P', 120, 100, 15, 'recoil:33', 0, 'Charges wrapped in fire. Hurts the user.'],
-    ['pyrestorm', 'Pyre Storm', 'Blaze', 'T', 110, 85, 5, 'brn:30', 0, 'A towering storm of fire.'],
+    ['pyrestorm', 'Pyre Storm', 'Blaze', 'T', 110, 85, 5, 'brn:30;spread', 0, 'A towering storm of fire.'],
     ['smolder', 'Smolder', 'Blaze', 'S', 0, 85, 15, 'brn:100', 0, 'Wreathes the foe in embers to burn it.'],
     ['stoke', 'Stoke', 'Blaze', 'S', 0, 0, 20, 'self:atk+1,spd+1', 0, 'Stokes inner fire. Raises Attack and Speed.'],
     ['infernohorn', 'Inferno Horn', 'Blaze', 'P', 100, 95, 10, 'brn:20', 0, 'Rams with blazing horns.'],
@@ -45,7 +45,7 @@
     ['tidelash', 'Tide Lash', 'Tide', 'P', 65, 100, 20, '', 0, 'Lashes out with a watery tail.'],
     ['undertow', 'Undertow', 'Tide', 'P', 85, 95, 10, 'foe:spd-1', 0, 'Drags the foe under. Lowers Speed.'],
     ['riptide', 'Riptide', 'Tide', 'T', 90, 100, 15, '', 0, 'A powerful surging current.'],
-    ['tsunamicrash', 'Tsunami Crash', 'Tide', 'T', 110, 80, 5, '', 0, 'A towering wall of water.'],
+    ['tsunamicrash', 'Tsunami Crash', 'Tide', 'T', 110, 80, 5, 'spread', 0, 'A towering wall of water.'],
     ['mistveil', 'Mist Veil', 'Tide', 'S', 0, 0, 20, 'self:res+2', 0, 'A veil of mist. Sharply raises Resolve.'],
     ['maelstrom', 'Maelstrom', 'Tide', 'T', 100, 95, 10, 'foe:spd-1@30', 0, 'A spiraling whirlpool of force.'],
     ['monsoon', 'Monsoon', 'Tide', 'T', 120, 95, 5, '', 0, 'Summons a torrential downpour.'],
@@ -78,7 +78,7 @@
     ['coldsnap', 'Cold Snap', 'Frost', 'T', 55, 95, 15, 'foe:spd-1', 0, 'A sudden chill. Lowers Speed.'],
     ['glacierray', 'Glacier Ray', 'Frost', 'T', 90, 100, 10, 'frz:10', 0, 'A ray of glacial cold.'],
     ['hailhammer', 'Hail Hammer', 'Frost', 'P', 100, 90, 10, '', 0, 'Smashes with a hammer of ice.'],
-    ['whiteout', 'Whiteout', 'Frost', 'T', 110, 75, 5, 'frz:20', 0, 'A blinding blizzard.'],
+    ['whiteout', 'Whiteout', 'Frost', 'T', 110, 75, 5, 'frz:20;spread', 0, 'A blinding blizzard.'],
     ['frostarmor', 'Frost Armor', 'Frost', 'S', 0, 0, 20, 'self:def+2', 0, 'Coats in ice. Sharply raises Defense.'],
     ['glacialfang', 'Glacial Fang', 'Frost', 'P', 110, 95, 5, 'frz:20', 0, 'Fangs of ancient ice.'],
     // ---- Brawl ----
@@ -96,15 +96,15 @@
     ['corrode', 'Corrode', 'Venom', 'T', 40, 100, 20, 'foe:res-2', 0, 'Corrosive slime. Sharply lowers Resolve.'],
     ['viperstrike', 'Viper Strike', 'Venom', 'P', 80, 100, 15, 'psn:30', 0, 'A lunging venom strike.'],
     ['blightbomb', 'Blight Bomb', 'Venom', 'T', 90, 100, 10, 'psn:30', 0, 'Hurls a bomb of toxic sludge.'],
-    ['plaguewave', 'Plague Wave', 'Venom', 'T', 110, 80, 5, 'psn:30', 0, 'A rolling wave of toxins.'],
+    ['plaguewave', 'Plague Wave', 'Venom', 'T', 110, 80, 5, 'psn:30;spread', 0, 'A rolling wave of toxins.'],
     ['noxiousfog', 'Noxious Fog', 'Venom', 'S', 0, 90, 10, 'psn:100', 0, 'A fog that poisons the foe.'],
     // ---- Terra ----
     ['mudflick', 'Mud Flick', 'Terra', 'T', 30, 100, 20, 'foe:spd-1', 0, 'Flicks mud. Lowers Speed.'],
     ['stonetoss', 'Stone Toss', 'Terra', 'P', 50, 90, 15, '', 0, 'Tosses a heavy stone.'],
-    ['tremorstomp', 'Tremor Stomp', 'Terra', 'P', 75, 95, 15, '', 0, 'A stomp that shakes the ground.'],
+    ['tremorstomp', 'Tremor Stomp', 'Terra', 'P', 75, 95, 15, 'spread', 0, 'A stomp that shakes the ground.'],
     ['geopulse', 'Geo Pulse', 'Terra', 'T', 70, 100, 15, '', 0, 'A pulse of energy from the earth.'],
     ['landslide', 'Landslide', 'Terra', 'P', 90, 90, 10, 'flinch:30', 0, 'Buries the foe in rocks. May flinch.'],
-    ['duneblast', 'Dune Blast', 'Terra', 'T', 90, 100, 10, '', 0, 'A blasting storm of sand.'],
+    ['duneblast', 'Dune Blast', 'Terra', 'T', 90, 100, 10, 'spread', 0, 'A blasting storm of sand.'],
     ['tectoniccrash', 'Tectonic Crash', 'Terra', 'P', 120, 85, 5, '', 0, 'Splits the very ground.'],
     ['bedrock', 'Bedrock', 'Terra', 'S', 0, 0, 20, 'self:def+2', 0, 'Becomes solid rock. Sharply raises Defense.'],
     // ---- Gale ----

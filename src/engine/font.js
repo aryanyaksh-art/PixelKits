@@ -177,6 +177,13 @@
     right: function (ctx, str, rx, y, color, shadow) {
       this.draw(ctx, str, rx - this.width(str), y, color, shadow);
     },
+    // shorten text with a trailing '.' so it fits in maxW pixels
+    fit: function (str, maxW) {
+      str = String(str);
+      if (this.width(str) <= maxW) return str;
+      while (str.length > 1 && this.width(str + '.') > maxW) str = str.slice(0, -1);
+      return str.replace(/\s+$/, '') + '.';
+    },
     wrap: function (text, maxW) {
       var out = [];
       var paras = String(text).split('\n');
@@ -184,6 +191,13 @@
         var words = paras[p].split(' ');
         var line = '';
         for (var i = 0; i < words.length; i++) {
+          while (this.width(words[i]) > maxW && words[i].length > 1) {
+            var cut = words[i].length - 1;
+            while (cut > 1 && this.width(words[i].slice(0, cut)) > maxW) cut--;
+            if (line) { out.push(line); line = ''; }
+            out.push(words[i].slice(0, cut));
+            words[i] = words[i].slice(cut);
+          }
           var test = line ? line + ' ' + words[i] : words[i];
           if (this.width(test) > maxW && line) { out.push(line); line = words[i]; }
           else line = test;

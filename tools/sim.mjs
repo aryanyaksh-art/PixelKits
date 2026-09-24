@@ -11,18 +11,31 @@ function fight(a, b, ai = 2) {
   const bt = new PK.Battle({ wild: false, playerParty: [a], enemyParty: [b], ai });
   let t = 0;
   while (!bt.over && a.hp > 0 && b.hp > 0 && t < 200) {
-    const pa = bt.chooseAIFor ? null : null;
-    // player side uses the same AI by swapping sides temporarily
-    const sw = [bt.p, bt.e]; bt.p = sw[1]; bt.e = sw[0];
-    const pAct = bt.chooseAI();
-    bt.p = sw[0]; bt.e = sw[1];
+    const pAct = bt.chooseFor(bt.p.slots[0], 2, false);
     const eAct = bt.chooseAI();
-    bt.runTurn(pAct.type === 'item' ? { type: 'move', idx: 0 } : pAct, eAct);
+    bt.runTurn(pAct, eAct);
     t++;
   }
   return { t, winner: a.hp > 0 && b.hp <= 0 ? 'a' : b.hp > 0 && a.hp <= 0 ? 'b' : 'draw' };
 }
 
+// double battles: 3 vs 3, two active per side, replacing fainted Kits from the bench
+function doubleFight(pa, pb) {
+  const bt = new PK.Battle({ wild: false, double: true, playerParty: pa, enemyParty: pb, ai: 2 });
+  let t = 0;
+  while (bt.p.alive() && bt.e.alive() && t < 300) {
+    const pActs = bt.p.slots.map(s => s.alive() ? bt.chooseFor(s, 2, false) : null);
+    const eActs = bt.chooseAI();
+    bt.runTurn(pActs, eActs);
+    for (const side of [bt.p, bt.e]) for (const s of side.slots) {
+      if (s.alive()) continue;
+      const bench = side.bench();
+      if (bench.length) bt.sendIn(s, side === bt.e ? bt.nextEnemy() : bench[0]);
+    }
+    t++;
+  }
+  return t;
+}
 for (let i = 0; i < N; i++) {
   const L = 5 + Math.floor(Math.random() * 60);
   const ia = PK.pick(ids), ib = PK.pick(ids);
@@ -38,6 +51,14 @@ for (let i = 0; i < N; i++) {
     if (errors < 5) console.error(e);
   }
 }
+let dblTurns = 0;
+for (let i = 0; i < Math.floor(N / 5); i++) {
+  const L = 10 + Math.floor(Math.random() * 50);
+  const mk = () => [0, 1, 2].map(() => PK.stats.create(PK.pick(ids), L));
+  try { const t = doubleFight(mk(), mk()); dblTurns += t; if (t >= 300) long++; }
+  catch (e) { errors++; if (errors < 5) console.error(e); }
+}
+console.log(`double battles: ${Math.floor(N / 5)}  avg turns: ${(dblTurns / Math.max(1, Math.floor(N / 5))).toFixed(1)}`);
 // level-up / evolution sanity
 for (const id of ids) {
   const k = PK.stats.create(id, 5);

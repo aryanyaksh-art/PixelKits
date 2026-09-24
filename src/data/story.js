@@ -142,7 +142,14 @@
         w.setFlag('got_omni');
         return;
       }
-      return w.say('PROF. VALE: The guardians rest in the Ember Tunnels, on an island off Tidewind Trail, and deep in the Frozen Depths.');
+      if (!w.flag('got_ferry')) {
+        await w.say('PROF. VALE: Oh, and one more thing! A colleague runs a research station on the Moonlit Isles, far to the southeast.');
+        await w.say('PROF. VALE: Kits live there that nobody in Lumora has ever recorded. Here - a Ferry Pass. The ferry leaves from the Saltmarsh docks.');
+        await w.give('ferrypass');
+        w.setFlag('got_ferry');
+        return;
+      }
+      return w.say('PROF. VALE: The guardians rest in the Ember Tunnels, on an island off Tidewind Trail, and deep in the Frozen Depths. And the Moonlit Isles await across the sea!');
     }
     await w.say('PROF. VALE: Let me see your KitLog... You\'ve caught ' + c + ' kind' + (c === 1 ? '' : 's') + ' of Kits!');
     if (c < 10) await w.say('A fine start! Explore the tall grass to find more.');

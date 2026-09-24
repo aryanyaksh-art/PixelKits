@@ -7,14 +7,36 @@
   function species(k) { return PK.KITS[k.id]; }
   function expFor(level) { return level <= 1 ? 0 : Math.floor(Math.pow(level, 3) * 0.9); }
 
+  function temperament(k) { return PK.TEMPERAMENTS[k.temper || 0]; }
   function calc(k) {
-    var sp = species(k), L = k.level, out = [];
+    var sp = species(k), L = k.level, out = [], tm = temperament(k), tp = k.tp || [0, 0, 0, 0, 0, 0];
     for (var i = 0; i < 6; i++) {
       var b = sp.stats[i], g = k.genes[i];
-      var v = Math.floor((2 * b + g * 2) * L / 100);
-      out.push(i === 0 ? v + L + 10 : v + 5);
+      var v = Math.floor((2 * b + g * 2 + Math.floor(tp[i] / 4)) * L / 100);
+      if (i === 0) { out.push(v + L + 10); continue; }
+      v += 5;
+      if (tm[1] !== tm[2]) { if (tm[1] === i) v = Math.floor(v * 1.1); else if (tm[2] === i) v = Math.floor(v * 0.9); }
+      out.push(v);
     }
     return out;
+  }
+  function ability(k) {
+    var a = species(k).abilities || ['forager'];
+    return a[(k.abil || 0) % a.length];
+  }
+  // bring Kits from older saves up to date
+  function upgrade(k) {
+    if (k.temper == null) k.temper = PK.rnd(PK.TEMPERAMENTS.length);
+    if (k.abil == null) k.abil = PK.rnd(2);
+    if (!k.tp) k.tp = [0, 0, 0, 0, 0, 0];
+    recalc(k);
+  }
+  function addTP(k, stat, n) {
+    if (!k.tp) k.tp = [0, 0, 0, 0, 0, 0];
+    var total = k.tp.reduce(function (a, b) { return a + b; }, 0);
+    var add = Math.max(0, Math.min(n, PK.TP_MAX - k.tp[stat], PK.TP_TOTAL - total));
+    k.tp[stat] += add;
+    return add;
   }
 
   function learnable(id, level) {
@@ -35,7 +57,10 @@
       sleep: 0,
       prism: opts.prism != null ? opts.prism : (!opts.noPrism && Math.random() < 1 / 512),
       held: opts.held || null,
-      friend: 70
+      friend: 70,
+      temper: opts.temper != null ? opts.temper : PK.rnd(PK.TEMPERAMENTS.length),
+      abil: opts.abil != null ? opts.abil : PK.rnd(2),
+      tp: [0, 0, 0, 0, 0, 0]
     };
     var ls = learnable(id, level);
     var uniq = [];
@@ -131,6 +156,7 @@
   PK.stats = {
     create: create, calc: calc, recalc: recalc, name: name, setLevel: setLevel, addExp: addExp, expFor: expFor,
     movesAt: movesAt, knows: knows, evoTarget: evoTarget, evolve: evolve, expProgress: expProgress,
-    heal: heal, types: types, species: species, learnable: learnable
+    heal: heal, types: types, species: species, learnable: learnable,
+    temperament: temperament, ability: ability, upgrade: upgrade, addTP: addTP
   };
 })();

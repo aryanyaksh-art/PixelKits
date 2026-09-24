@@ -23,21 +23,27 @@
     if (PK.audio && PK.audio.unlock) PK.audio.unlock();
   }
 
+  // While a text field is active, printable keys type letters instead of acting as buttons
+  function textKey(e) {
+    return PK.input.textMode && e.key && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey;
+  }
   window.addEventListener('keydown', function (e) {
-    var b = KEYMAP[e.code];
+    var b = textKey(e) ? null : KEYMAP[e.code];
+    if (PK.input.textMode && e.code === 'Backspace') e.preventDefault();
     if (e.code === 'Backquote' && PK.debug) { PK.speed = PK.speed === 1 ? 4 : 1; }
     if (b) { e.preventDefault(); keys[e.code] = b; latch[b] = true; }
     unlock();
     for (var i = 0; i < listeners.length; i++) listeners[i](e);
   });
   window.addEventListener('keyup', function (e) {
-    if (KEYMAP[e.code]) { e.preventDefault(); delete keys[e.code]; }
+    if (keys[e.code]) { e.preventDefault(); delete keys[e.code]; }
   });
   window.addEventListener('blur', function () { keys = {}; touch = {}; });
   window.addEventListener('pointerdown', unlock);
 
   PK.input = {
     pressed: pressed,
+    textMode: false,
     update: function () {
       var raw = {};
       for (var k in keys) raw[keys[k]] = true;
@@ -79,6 +85,7 @@
       return null;
     },
     setTouch: function (b, v) { touch[b] = v; if (v) { latch[b] = true; unlock(); } },
-    onKey: function (fn) { listeners.push(fn); }
+    onKey: function (fn) { listeners.push(fn); },
+    offKey: function (fn) { var i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }
   };
 })();
