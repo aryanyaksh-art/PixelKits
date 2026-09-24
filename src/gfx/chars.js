@@ -103,7 +103,7 @@
     juno: { head: 'spiky', h: '#f0e040', H: '#c0a818', c: '#2a2a3a', C: '#16161e', p: '#f0e040', P: '#b0a020' },
     marisol: { head: 'long', h: '#2a78d0', H: '#1a54a0', c: '#f4f8ff', C: '#a8c8f0', p: '#2a78d0', P: '#1a54a0' },
     ignatius: { head: 'spiky', h: '#e85a2a', H: '#b0381a', c: '#3a2a2a', C: '#221818', p: '#8a2a1a', P: '#5a1a10' },
-    seraphine: { head: 'long', h: '#e070c0', H: '#a84890', c: '#6a3ab0', C: '#48227e', p: '#6a3ab0', P: '#48227e' },
+    celestine: { head: 'long', h: '#e070c0', H: '#a84890', c: '#6a3ab0', C: '#48227e', p: '#6a3ab0', P: '#48227e' },
     bjorn: { head: 'short', h: '#e8e8f0', H: '#a8b0c8', c: '#6aa8e0', C: '#3e78b0', p: '#3a4a6a', P: '#24304a' },
     morwen: { head: 'long', h: '#2a1a3a', H: '#140a1e', s: '#e8e0ec', S: '#c0b0cc', c: '#3a2a5a', C: '#22163a', p: '#3a2a5a', P: '#22163a' },
     dax: { head: 'short', h: '#1a1a1a', H: '#000000', s: '#a8744a', S: '#80522e', c: '#d83a3a', C: '#982424', p: '#2a2a2a', P: '#141414' },

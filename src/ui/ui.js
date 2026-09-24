@@ -328,6 +328,18 @@
     menu: function (items, opts) {
       return new Promise(function (res) { PK.push(new Menu(items, opts, res)); });
     },
+    // Overlay a Kit portrait (e.g. while choosing a starter); returns the overlay to PK.pop later
+    showKit: function (id) {
+      var s = {
+        draw: function (ctx) {
+          box(ctx, 84, 14, 72, 74);
+          ctx.fillStyle = '#dfe9f6'; ctx.fillRect(89, 19, 62, 64);
+          ctx.drawImage(PK.kitArt.get(id, 'front'), 88, 18);
+        }
+      };
+      PK.push(s);
+      return s;
+    },
     number: function (opts) {
       return new Promise(function (res) { PK.push(new NumberPick(opts, res)); });
     },

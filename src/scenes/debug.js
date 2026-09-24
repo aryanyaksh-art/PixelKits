@@ -67,6 +67,68 @@
 
   PK.Gallery = Gallery;
 
+  // Test harness (used for automated play-testing from the dev tools)
+  PK.test = {
+    // advance n frames, letting async scripts progress between frames
+    step: async function (n) {
+      for (var i = 0; i < (n || 1); i++) {
+        PK.step();
+        for (var k = 0; k < 6; k++) await null;
+      }
+      PK.draw();
+      return PK.frame;
+    },
+    press: async function (b, hold) {
+      PK.input.setTouch(b, true);
+      await PK.test.step(hold || 2);
+      PK.input.setTouch(b, false);
+      await PK.test.step(2);
+    },
+    // press a button repeatedly (e.g. to advance text)
+    mash: async function (b, times, gap) {
+      for (var i = 0; i < times; i++) { await PK.test.press(b); await PK.test.step(gap || 6); }
+    },
+    walk: async function (dir, n) {
+      for (var i = 0; i < (n || 1); i++) {
+        if (PK.world.busy || PK.top().constructor.name !== 'Overworld') break;
+        PK.world.tryMove(dir);
+        await PK.test.step(20);
+        for (var k = 0; k < 40 && (PK.world.busy || PK.world.p.moving); k++) await PK.test.step(2);
+      }
+    },
+    face: function (d) { PK.world.p.dir = d; },
+    idle: function () { return PK.top() && PK.top().constructor.name === 'Overworld' && PK.world.busy === 0 && !PK.world.p.moving; },
+    battle: function () { return PK.scenes.filter(function (s) { return s instanceof PK.BattleScene; })[0]; },
+    // press A through dialogue until the overworld is idle (answers menus with the default choice)
+    advance: async function (max) {
+      var calm = 0;
+      for (var i = 0; i < (max || 80); i++) {
+        if (PK.test.idle()) { calm++; if (calm > 3) return i; await PK.test.step(5); continue; }
+        calm = 0;
+        if (PK.top().constructor.name === 'NameEntry') { await PK.test.press('start'); await PK.test.step(10); continue; }
+        var b = PK.test.battle();
+        if (b && b.mode === 'action') { await PK.test.press('a'); await PK.test.step(4); await PK.test.press('a'); await PK.test.step(20); continue; }
+        await PK.test.press('a'); await PK.test.step(25);
+      }
+      return -1;
+    },
+    // teleport for testing
+    warp: function (map, x, y) { PK.world.load(map, x, y, 'down'); },
+    shot: function (name, scale) {
+      scale = scale || 3;
+      var c = PK.makeCanvas(PK.W * scale, PK.H * scale);
+      var x = c.getContext('2d');
+      x.imageSmoothingEnabled = false;
+      PK.draw();
+      x.drawImage(PK.canvas, 0, 0, c.width, c.height);
+      return fetch('/__shot?name=' + encodeURIComponent(name || 'shot'), { method: 'POST', body: c.toDataURL('image/png') }).then(function () { return name; });
+    },
+    info: function () {
+      var w = PK.world, top = PK.top();
+      return { scene: top && top.constructor && top.constructor.name, map: w.map && w.map.id, x: w.p.x, y: w.p.y, busy: w.busy, party: PK.game.state.party.map(function (k) { return PK.stats.name(k) + ' ' + k.level + ' ' + k.hp + '/' + k.stats[0]; }), err: PK.lastError && String(PK.lastError.stack || PK.lastError) };
+    }
+  };
+
   PK.debugMenu = function () {
     return PK.run(async function () {
       var maps = Object.keys(PK.MAPS).filter(function (k) { return !PK.MAPS[k].interior; });

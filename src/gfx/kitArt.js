@@ -36,19 +36,23 @@
     return p;
   }
 
-  function Builder(spec, view, prism) {
+  function Builder(spec, view, prism, size) {
     this.spec = spec;
     this.view = view; // 'front' | 'back'
-    this.g = new PK.PG(64, 64);
+    this.cw = size || (view === 'back' ? 84 : 64);
+    this.g = new PK.PG(this.cw, this.cw);
     this.g.lx = -0.35; this.g.ly = -0.65;
     var st = spec.stage || 1;
-    this.s = spec.s || [0, 0.64, 0.8, 0.97][st] || 0.85;
+    var s = spec.s || [0, 0.64, 0.8, 0.97][st] || 0.85;
+    if (!spec.icon) s = Math.min(1.02, s * 1.12);
+    if (view === 'back') s *= 1.3;
+    this.s = s;
     this.prism = prism;
   }
   var B = Builder.prototype;
   // transforms from design space (64x64, ground at y=62) to scaled space
-  B.X = function (x) { return 32 + (x - 32) * this.s; };
-  B.Y = function (y) { return 62 - (62 - y) * this.s; };
+  B.X = function (x) { return this.cw / 2 + (x - 32) * this.s; };
+  B.Y = function (y) { return (this.cw - 2) - (62 - y) * this.s; };
   B.L = function (v) { return v * this.s; };
   B.el = function (x, y, rx, ry, m, o) { this.g.ellipse(this.X(x), this.Y(y), this.L(rx), this.L(ry), m, o); };
   B.ln = function (x0, y0, x1, y1, m, r0, r1, o) { this.g.line(this.X(x0), this.Y(y0), this.X(x1), this.Y(y1), m, this.L(r0), this.L(r1 == null ? r0 : r1), o); };
@@ -60,8 +64,9 @@
   // Recolor pixels of material `from` to `to` within ellipse region, keeping shading
   B.recolor = function (from, to, pred) {
     var g = this.g;
-    for (var y = 0; y < 64; y++) for (var x = 0; x < 64; x++) {
-      var i = y * 64 + x;
+    var W = g.w, Hh = g.h;
+    for (var y = 0; y < Hh; y++) for (var x = 0; x < W; x++) {
+      var i = y * W + x;
       if (g.mat[i] === from && pred(x, y)) g.mat[i] = to;
     }
   };
@@ -659,9 +664,9 @@
     var key = id + '|icon|' + (prism ? 1 : 0);
     if (cache[key]) return cache[key];
     var k = PK.KITS[id];
-    var spec = Object.assign({ n: k.name, stage: k.stage }, k.art);
+    var spec = Object.assign({ n: k.name, stage: k.stage, icon: true }, k.art);
     spec.s = 0.5;
-    var b = new Builder(spec, 'front', prism);
+    var b = new Builder(spec, 'front', prism, 64);
     b.build();
     var full = b.g.render(palette(spec, prism), { dither: 0.3 });
     var c = PK.makeCanvas(32, 32);

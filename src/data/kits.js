@@ -163,7 +163,7 @@
     }
     var plan = [
       [1, function () { return pick('Plain', 1); }],
-      [1, function () { return status('Plain'); }],
+      [1, function () { var o = ['glower', 'pout', 'puffup'][r.int(3)]; used[o] = 1; return o; }],
       [4, function () { return pick(t1, 1); }],
       [8, function () { return k.types[1] ? pick(t2, 1) : status(t1); }],
       [12, function () { return pick('Plain', 2); }],
