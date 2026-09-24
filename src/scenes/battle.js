@@ -76,7 +76,7 @@
     });
   };
   S.say = function (text, opts) {
-    return PK.ui.say(text, Object.assign({}, opts || {}));
+    return PK.ui.say(text, Object.assign({ dark: true }, opts || {}));
   };
   S.bt = function (key) { return this.b.byKey(key); };
   S.kitImg = function (key) {
@@ -434,6 +434,7 @@
   // ---------------- Safari ----------------
   S.safariLoop = async function () {
     var b = this.b, st = PK.game.state, sf = this.safariState, k = b.e.kit(), self = this;
+    if (!st.safari) st.safari = { balls: 30, steps: 500 };
     for (;;) {
       if (st.safari && st.safari.balls <= 0) { await this.say('You have no Safari Capsules left!'); return 'fled'; }
       var c = await this.safariChoice();
@@ -782,16 +783,17 @@
   S.drawPanel = function (ctx) {
     var T = PK.ui.THEME;
     var busy = this.mode !== 'action' && this.mode !== 'moves' && this.mode !== 'target' && this.mode !== 'safari';
-    if (busy && this.wipe <= 0) PK.ui.box(ctx, 4, 116, 232, 42);
+    var D = PK.ui.DARK;
+    if (busy && this.wipe <= 0) PK.ui.box(ctx, 4, 116, 232, 42, D);
     if (this.mode === 'action' || this.mode === 'safari') {
-      PK.ui.box(ctx, 4, 116, 232, 42);
+      PK.ui.box(ctx, 4, 116, 232, 42, D);
       if (this.mode === 'safari') {
-        F().draw(ctx, 'What will', 14, 125, T.text, T.shadow);
-        F().draw(ctx, PK.game.state.player.name + ' do?', 14, 139, T.text, T.shadow);
+        F().draw(ctx, 'What will', 14, 125, D.text, D.shadow);
+        F().draw(ctx, F().fit(PK.game.state.player.name, 80) + ' do?', 14, 139, D.text, D.shadow);
       } else {
-        var nm = F().fit(PK.stats.name(this.actor.kit()), 100);
-        F().draw(ctx, 'What will', 14, 125, T.text, T.shadow);
-        F().draw(ctx, nm + ' do?', 14, 139, T.text, T.shadow);
+        var nm = F().fit(PK.stats.name(this.actor.kit()), 80);
+        F().draw(ctx, 'What will', 14, 125, D.text, D.shadow);
+        F().draw(ctx, nm + ' do?', 14, 139, D.text, D.shadow);
       }
       PK.ui.box(ctx, 120, 116, 116, 42);
       var balls = PK.game.state.safari ? PK.game.state.safari.balls : 0;
@@ -835,14 +837,14 @@
   S.draw = function (ctx) {
     var self = this;
     this.drawBg(ctx);
-    if (this.trainerE2) ctx.drawImage(this.trainerE2.img, 204 - 24 + this.trainerE2.dx, this.pos.e0.y - 46);
-    if (this.trainerE) ctx.drawImage(this.trainerE.img, (this.trainerE2 ? 152 : this.pos.e0.x) - 24 + this.trainerE.dx, this.pos.e0.y - 46);
+    if (this.trainerE2) ctx.drawImage(this.trainerE2.img, 204 - 24 + this.trainerE2.dx, this.pos.e0.y - 60);
+    if (this.trainerE) ctx.drawImage(this.trainerE.img, (this.trainerE2 ? 152 : this.pos.e0.x) - 24 + this.trainerE.dx, this.pos.e0.y - 60);
     var keys = Object.keys(this.show).sort(function (a, b) {
       if (a[0] !== b[0]) return a[0] === 'e' ? -1 : 1;
       return (self.pos[a] ? self.pos[a].y : 0) - (self.pos[b] ? self.pos[b].y : 0);
     });
     keys.filter(function (k) { return k[0] === 'e'; }).forEach(function (k) { self.drawKit(ctx, k); });
-    if (this.trainerP) ctx.drawImage(this.trainerP.img, this.pos.p0.x - 24 + this.trainerP.dx, this.pos.p0.y - 46);
+    if (this.trainerP) ctx.drawImage(this.trainerP.img, this.pos.p0.x - 24 + this.trainerP.dx, this.pos.p0.y - 58);
     keys.filter(function (k) { return k[0] === 'p'; }).forEach(function (k) { self.drawKit(ctx, k); });
     if (this.capsule) PK.bfx.drawCapsule(ctx, this.capsule.x, this.capsule.y, this.capsule.item, this.capsule.open, this.capsule.glow);
     if (this.darken > 0) { ctx.fillStyle = 'rgba(20,10,40,' + Math.min(0.45, this.darken / 40) + ')'; ctx.fillRect(0, 0, PK.W, PK.H); }

@@ -318,7 +318,7 @@
   });
   IN('mc_clinic', 'clinic', { name: 'Mirage Clinic' });
   IN('mc_shop', 'shop', { name: 'Mirage Mega Shop', stock: ['capsule', 'pluscapsule', 'procapsule', 'hitonic', 'megatonic', 'remedy', 'rekindle', 'chargecell', 'hushspraymax', 'exitcord', 'vigorroot', 'mightroot', 'guardroot', 'focusroot', 'calmroot', 'swiftroot', 'sd01', 'sd08', 'sd12', 'sd19', 'voltshard', 'frostshard', 'radiantshard', 'umbralshard'] });
-  IN('mc_house1', 'house', { name: "Scholar's House", people: [{ x: 5, y: 3, sprite: 'scholar', dir: 'down', talk: PK.story.gift('got_powerband', 'powerband', 'A traveling keeper! My research is done, so take this Power Band. It boosts the holder\'s attacks.', 'Power Band gives a 10% boost. Small, but it adds up!') }] });
+  IN('mc_house1', 'house', { name: "Scholar's House", people: [{ x: 5, y: 3, sprite: 'scholar', dir: 'down', talk: PK.story.gift('got_powerband', 'powerband', 'A traveling keeper! My research is done, so take this Might Band. It boosts the holder\'s attacks.', 'Might Band gives a 10% boost. Small, but it adds up!') }] });
   IN('mc_house2', 'house2', { name: 'Collector\'s House', people: [{ x: 3, y: 2, sprite: 'oldwoman', dir: 'down', talk: PK.story.gift('got_umbral', 'umbralshard', 'I collect shards, but I have two of these. Here, take an Umbral Shard!', 'Umbral Shards make certain shadowy Kits evolve.') }] });
   D('mc_gym', {
     name: 'Mirage Gym', interior: true, theme: 'gym_Mind', music: 'city',

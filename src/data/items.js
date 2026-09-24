@@ -34,7 +34,7 @@
   it('radiantshard', 'Radiant Shard', 'items', 2100, 'evo', 0, 'A glowing shard. Makes certain Kits evolve.');
   it('umbralshard', 'Umbral Shard', 'items', 2100, 'evo', 0, 'A dark shard. Makes certain Kits evolve.');
   // held
-  it('powerband', 'Power Band', 'items', 3000, 'held', 0, 'Held: boosts move power by 10%.');
+  it('powerband', 'Might Band', 'items', 3000, 'held', 0, 'Held: boosts move power by 10%.');
   it('healroot', 'Healroot', 'items', 800, 'held', 0, 'Held: restores 25% HP once when HP falls below half.');
   it('luckyclover', 'Lucky Clover', 'items', 5000, 'held', 0, 'Held: the holder earns 50% more EXP.');
   it('quickcharm', 'Quick Charm', 'items', 2500, 'held', 0, 'Held: sometimes lets the holder move first.');

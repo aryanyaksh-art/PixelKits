@@ -99,7 +99,8 @@
       if (pick === 'OPTIONS') { await PK.menus.options(); continue; }
       if (pick === 'CONTROLS') {
         await PK.ui.say('Arrow keys or WASD move. Z, Space or J is A (confirm/talk). X, Esc or K is B (back).');
-        await PK.ui.say('Enter or C opens the menu. Hold Shift to run. On phones, use the on-screen buttons.');
+        await PK.ui.say('Enter or C opens the menu. Hold B or Shift to run. Tap Shift (SELECT) to use a registered key item.');
+        await PK.ui.say('On phones, use the on-screen buttons. When naming, just type on your keyboard.');
       }
     }
   };
@@ -187,7 +188,7 @@
   async function pickName(title, presets, def) {
     var items = ['NEW NAME'].concat(presets);
     var i = await PK.ui.menu(items, { x: 8, y: 8, cancel: false, title: title });
-    if (i === 0) return (await PK.ui.name(title, def)).toUpperCase().slice(0, 10);
+    if (i === 0) return (await PK.ui.name(title, def)).slice(0, 10);
     return presets[i - 1];
   }
   Intro.prototype.update = function () {};
@@ -197,9 +198,9 @@
     ctx.fillStyle = g; ctx.fillRect(0, 0, PK.W, PK.H);
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
     ctx.beginPath(); ctx.ellipse(120, 100, 70, 14, 0, 0, 6.3); ctx.fill();
-    if (this.showProf) ctx.drawImage(this.prof, 88, 38);
-    if (this.showPlayer) ctx.drawImage(PK.chars.portrait('player', 4, 'down'), 88, 38);
-    if (this.showRival) ctx.drawImage(PK.chars.portrait('rival', 4, 'down'), 88, 38);
+    if (this.showProf) ctx.drawImage(this.prof, 88, 18);
+    if (this.showPlayer) ctx.drawImage(PK.chars.portrait('player', 4, 'down'), 88, 18);
+    if (this.showRival) ctx.drawImage(PK.chars.portrait('rival', 4, 'down'), 88, 18);
     if (this.kit) {
       ctx.drawImage(PK.kitArt.get(this.kit, 'front'), 150, 44);
     }

@@ -17,8 +17,8 @@
   PK.TILE = TILE;
 
   var TH = {
-    vale: { style: 'grass', g: ['#3e8c3b', '#5fb04a', '#8ccf5e'], tg: ['#1d6630', '#2f873d', '#56b052', '#94db70'], path: ['#a67c4a', '#c9a26b', '#e2c18c'], tree: 'round', leaf: '#3f9e47', trunk: '#7a5230', water: ['#2c5cb4', '#3f82da', '#76b0f0', '#d9eeff'], wall: ['#5f5040', '#86705a', '#ab9478'], fence: '#f2eee4', fl: ['#ffffff', '#ee5a5a', '#f6cf3a', '#f08ad0'], pave: ['#8c8886', '#b2aea8', '#cdc8c0'] },
-    coast: { style: 'grass', g: ['#6f9a3a', '#93bd50', '#bcd872'], tg: ['#3f6e22', '#5a8e2e', '#80b440', '#b6dc6a'], path: ['#cdb27a', '#e4cc92', '#f5e6b8'], tree: 'palm', leaf: '#46a44a', trunk: '#9a6a3a', water: ['#1b6db6', '#2b92da', '#68c2f2', '#e0f6ff'], wall: ['#7a6048', '#a5845e', '#c7a67c'], fence: '#ffffff', fl: ['#ffffff', '#ff7a4a', '#f8e04a', '#6ad0ff'], pave: ['#9a948c', '#c0b8ae', '#dcd4c8'] },
+    vale: { style: 'grass', g: ['#4e9c46', '#72c060', '#9edc84'], tg: ['#1f6a34', '#2f8a3e', '#4cae4c', '#86d672'], path: ['#b89058', '#dcbc80', '#eed6a4'], tree: 'round', leaf: '#44a04c', trunk: '#7a5230', water: ['#2e62c4', '#4a8ee6', '#84c2f8', '#e4f4ff'], wall: ['#5f5040', '#86705a', '#ab9478'], fence: '#f2eee4', fl: ['#ffffff', '#ee5a5a', '#f6cf3a', '#f08ad0'], pave: ['#8c8886', '#b2aea8', '#cdc8c0'] },
+    coast: { style: 'grass', g: ['#6aa444', '#8ec85a', '#b8e27c'], tg: ['#3a7026', '#529432', '#78b842', '#b0e06a'], path: ['#d4b880', '#ecd49c', '#f8eac4'], tree: 'palm', leaf: '#46a44a', trunk: '#9a6a3a', water: ['#1b6db6', '#2b92da', '#68c2f2', '#e0f6ff'], wall: ['#7a6048', '#a5845e', '#c7a67c'], fence: '#ffffff', fl: ['#ffffff', '#ff7a4a', '#f8e04a', '#6ad0ff'], pave: ['#9a948c', '#c0b8ae', '#dcd4c8'] },
     desert: { style: 'speck', g: ['#c89c58', '#e0bc76', '#f2d89a'], tg: ['#7c5e26', '#9e8036', '#c2a24e', '#e2cc74'], path: ['#b08850', '#c89e62', '#dcb67c'], tree: 'cactus', leaf: '#4a984a', trunk: '#6a4a2a', water: ['#1b6db6', '#2b92da', '#68c2f2', '#e0f6ff'], wall: ['#8a5a36', '#b0744a', '#cf9a66'], fence: '#c8a070', fl: ['#f8f0d0', '#e87040', '#f8d040', '#d070c0'], pave: ['#a89a84', '#c4b8a0', '#dcd2bc'] },
     snow: { style: 'speck', g: ['#b4c6e0', '#e0eaf6', '#ffffff'], tg: ['#56789a', '#7a9cba', '#a6c4dc', '#d8ecf8'], path: ['#98a4b8', '#bac4d4', '#d6dee8'], tree: 'pine', leaf: '#2f6e5a', trunk: '#6a4a36', water: ['#2a5a9a', '#3d78bc', '#78a8da', '#e8f4ff'], wall: ['#5a6478', '#7c889e', '#a6b2c6'], fence: '#8a6a4a', fl: ['#ffffff', '#a0d0ff', '#f0f8ff', '#c8b0f0'], pave: ['#8a92a0', '#aab2c0', '#c8d0dc'] },
     spooky: { style: 'grass', g: ['#474766', '#5c5c80', '#7a7aa0'], tg: ['#241f3a', '#38325a', '#544c82', '#7c74ac'], path: ['#665862', '#82727e', '#9e8e9a'], tree: 'dead', leaf: '#5a4a6a', trunk: '#4a3a44', water: ['#26265a', '#36367a', '#5656a0', '#9a9ad0'], wall: ['#3a3646', '#534e62', '#6e6880'], fence: '#6a6070', fl: ['#d0c8f0', '#a070d0', '#70e0c0', '#f0a0d0'], pave: ['#5c5866', '#767282', '#908c9c'] },
@@ -168,6 +168,72 @@
       g.poly([[12, 7], [15, 14.5], [10, 14.5]], 0, { light: 0.4 });
       x.drawImage(g.render([ramp(P.wall[2])]), 0, 0);
     }
+  }
+
+  // Trees drawn 16x24 so they overlap the tile above, forming dense forest walls
+  var TALL = { round: 1, pine: 1, palm: 1, dead: 1 };
+  var treeCache = {};
+  function tallTree(themeName, variant) {
+    var key = themeName + '|' + variant;
+    if (treeCache[key]) return treeCache[key];
+    var P = theme(themeName), kind = P.tree, lf = ramp(P.leaf), tr = ramp(P.trunk);
+    var g = new PK.PG(16, 24);
+    g.lx = -0.5; g.ly = -0.7;
+    var c;
+    if (kind === 'round') {
+      g.rect(6, 17, 4, 6, 1, { hgrad: 1 });
+      g.ellipse(8, 10.5, 7.4, 8, 0);
+      g.ellipse(4, 14, 3.6, 3.4, 0, { bias: -0.06 });
+      g.ellipse(12, 14, 3.6, 3.4, 0, { bias: -0.1 });
+      g.ellipse(8, 5, 4.8, 3.8, 0, { bias: 0.1 });
+      g.ellipse(4.6, 8, 2.8, 2.6, 0, { bias: 0.14 });
+      c = g.render([lf, tr]);
+      var x = c.getContext('2d'), dk = PK.color.shade(P.leaf, -0.42), hi = PK.color.shade(P.leaf, 0.42);
+      // leaf clump detail
+      [[5, 12], [10, 9], [11, 15], [7, 16], [3, 10], [9, 13]].forEach(function (q, i) {
+        if ((i + variant) % 3 === 0) return;
+        x.fillStyle = dk; x.fillRect(q[0], q[1], 2, 1); x.fillRect(q[0] + 1, q[1] - 1, 1, 1);
+      });
+      x.fillStyle = hi; x.fillRect(5, 4, 2, 1); x.fillRect(4, 5, 1, 1); x.fillRect(9, 3, 2, 1);
+    } else if (kind === 'pine') {
+      var sn = ['#b8cce4', '#dbe8f6', '#ffffff', '#ffffff'];
+      g.rect(7, 19, 2, 4, 1);
+      g.poly([[8, 1], [13, 7.5], [3, 7.5]], 0);
+      g.poly([[8, 4.5], [14.5, 12.5], [1.5, 12.5]], 0);
+      g.poly([[8, 8.5], [15.5, 18.5], [0.5, 18.5]], 0);
+      g.poly([[8, 1], [10.5, 4.5], [5.5, 4.5]], 2, { light: 0.7 });
+      g.poly([[8, 5], [11, 8], [5, 8]], 2, { light: 0.6 });
+      g.poly([[3, 12.2], [5, 11], [7, 12.2]], 2, { light: 0.55 });
+      g.poly([[9, 12.2], [11, 11], [13, 12.2]], 2, { light: 0.55 });
+      g.poly([[2, 18.2], [4.5, 16.6], [7, 18.2]], 2, { light: 0.55 });
+      g.poly([[9, 18.2], [11.5, 16.6], [14, 18.2]], 2, { light: 0.55 });
+      c = g.render([lf, tr, sn]);
+    } else if (kind === 'palm') {
+      g.curve(6 + (variant % 2), 23, 7, 14, 9, 8, 1, 1.5, 1.1);
+      var fr = [[0, 10], [2, 5], [8, 3], [14, 5], [16, 10], [12, 12], [4, 12]];
+      for (var i = 0; i < fr.length; i++) g.curve(9, 8, (9 + fr[i][0]) / 2, Math.min(8, fr[i][1]) - 2, fr[i][0], fr[i][1] + 1, 0, 1.6, 0.6);
+      g.ellipse(9, 8.5, 1.8, 1.5, 2, { light: 0.4 });
+      c = g.render([lf, tr, ramp('#7a5a30')]);
+    } else {
+      g.line(8, 23, 8, 8, 1, 1.8, 1.1);
+      g.line(8, 13, 3, 7, 1, 1.1, 0.5);
+      g.line(8, 11, 13, 6, 1, 1.1, 0.5);
+      g.line(8, 8, 6, 3, 1, 0.9, 0.4);
+      g.line(10.5, 9, 12.5, 10.5, 1, 0.7, 0.4);
+      g.ellipse(4, 6, 2.2, 1.6, 0, { bias: -0.1 });
+      g.ellipse(12.5, 5, 2.4, 1.7, 0, { bias: -0.1 });
+      c = g.render([lf, tr]);
+    }
+    treeCache[key] = c;
+    return c;
+  }
+  function hasTallTrees(themeName) { return !!TALL[theme(themeName).tree] && !INTERIOR[theme(themeName).style]; }
+  // draw tall trees for a region of the map (row order so lower trees overlap upper ones)
+  function drawTrees(ctx, map, x0, y0, x1, y1) {
+    if (!hasTallTrees(map.theme)) return;
+    for (var ty = Math.max(0, y0); ty <= Math.min(map.h - 1, y1); ty++)
+      for (var tx = Math.max(0, x0); tx <= Math.min(map.w - 1, x1); tx++)
+        if (map.at(tx, ty) === 'T') ctx.drawImage(tallTree(map.theme, ((tx * 7 + ty * 13) >>> 0) % 3), tx * S, ty * S - 8);
   }
 
   function tallGrass(x, P, frame) {
@@ -416,7 +482,7 @@
     var r = PK.seeded(PK.hash(key.replace('|' + frame + '|', '|')));
     var interior = INTERIOR[P.style];
     var needGround = '.,"T:SbrRfLkvtpBQ'.indexOf(ch) >= 0 || (interior && 'ctBKpCHDQM'.indexOf(ch) >= 0);
-    if (needGround || ch === ',' || ch === '.') groundBase(x, P, r);
+    if ((needGround && !(flags & 2)) || ch === ',' || ch === '.') groundBase(x, P, r);
     switch (ch) {
       case '.': break;
       case ',': if (interior) furniture(x, P, ',', frame); else flowers(x, P, frame, r); break;
@@ -486,6 +552,7 @@
     return c;
   }
 
+  var OBJ = 'SbrRfLkQ';
   var ANIM = { '~': 1, '=': 1, '|': 1, 'l': 1, ',': 1, 'H': 1, 'C': 1 };
 
   function isWaterish(ch) { return ch === '~' || ch === '=' || ch === '|'; }
@@ -502,6 +569,12 @@
     if ((ch === 'W' || ch === 'Y' || ch === 'Z') && interior) {
       var b = map.at(tx, ty + 1);
       if (b === 'W' || b === 'Y' || b === 'Z' || b === ' ') flags = 1;
+    }
+    if (ch === 'T' && hasTallTrees(map.theme)) ch = '.';
+    // objects standing on paving use the paving underneath instead of grass
+    if (!interior && OBJ.indexOf(ch) >= 0) {
+      var nb = [map.at(tx - 1, ty), map.at(tx + 1, ty), map.at(tx, ty + 1), map.at(tx, ty - 1)].filter(function (q) { return q === 'g' || q === 'd'; })[0];
+      if (nb) { ctx.drawImage(tileCanvas(map.theme, nb, 0, variant, 0), px, py); flags |= 2; }
     }
     ctx.drawImage(tileCanvas(map.theme, ch, f, variant, flags), px, py);
     var n = map.at(tx, ty - 1), s = map.at(tx, ty + 1), w = map.at(tx - 1, ty), e = map.at(tx + 1, ty);
@@ -528,6 +601,8 @@
     S: S,
     get: tileCanvas,
     drawMapTile: drawMapTile,
+    drawTrees: drawTrees,
+    tallTree: tallTree,
     isAnimated: function (ch) { return !!ANIM[ch]; },
     theme: theme
   };

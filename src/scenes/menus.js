@@ -168,8 +168,8 @@
   Summary.prototype.update = function () {
     var inp = PK.input, n = PK.game.state.party.length;
     if (this.list) n = this.list.length;
-    if (inp.rep('left')) { this.page = (this.page + 2) % 3; if (PK.audio) PK.audio.sfx('move'); }
-    if (inp.rep('right')) { this.page = (this.page + 1) % 3; if (PK.audio) PK.audio.sfx('move'); }
+    if (inp.rep('left')) { this.page = (this.page + 3) % 4; if (PK.audio) PK.audio.sfx('move'); }
+    if (inp.rep('right')) { this.page = (this.page + 1) % 4; if (PK.audio) PK.audio.sfx('move'); }
     if (inp.rep('up')) { this.i = (this.i - 1 + n) % n; if (PK.audio) PK.audio.sfx('move'); }
     if (inp.rep('down')) { this.i = (this.i + 1) % n; if (PK.audio) PK.audio.sfx('move'); }
     if (inp.cancel() || inp.ok()) { if (PK.audio) PK.audio.sfx('back'); PK.pop(this); if (this.done) this.done(); }
@@ -177,16 +177,17 @@
   Summary.prototype.draw = function (ctx) {
     var list = this.list || PK.game.state.party;
     var k = list[this.i], sp = PK.KITS[k.id], t = T();
+    PK.stats.upgrade(k);
     bgPattern(ctx, '#e8c070', '#e2b862');
     PK.ui.box(ctx, 4, 4, 88, 96);
-    ctx.fillStyle = '#dfe9f6'; ctx.fillRect(8, 8, 80, 72);
-    ctx.drawImage(PK.kitArt.get(k.id, 'front', k.prism), 12, 10);
-    F().draw(ctx, 'No.' + ('00' + k.id).slice(-3), 10, 84, t.dim);
-    if (k.prism) F().draw(ctx, '★', 80, 84, '#e0a020');
-    F().draw(ctx, PK.stats.name(k), 10, 92 - 1 + 0, t.text);
+    ctx.fillStyle = '#dfe9f6'; ctx.fillRect(7, 7, 82, 68);
+    ctx.drawImage(PK.kitArt.get(k.id, 'front', k.prism), 12, 8);
+    F().draw(ctx, 'No.' + ('00' + k.id).slice(-3), 9, 78, t.dim);
+    if (k.prism) F().draw(ctx, '★', 80, 78, '#e0a020');
+    F().draw(ctx, F().fit(PK.stats.name(k), 78), 9, 88, t.text, t.shadow);
     PK.ui.box(ctx, 96, 4, 140, 20);
-    F().draw(ctx, ['INFO / STATS', 'MOVES', 'NOTES'][this.page], 104, 10, t.text, t.shadow);
-    F().right(ctx, '< >', 228, 10, t.dim);
+    F().draw(ctx, ['INFO / STATS', 'MOVES', 'NOTES', 'ABILITY'][this.page], 104, 10, t.text, t.shadow);
+    for (var pd = 0; pd < 4; pd++) { ctx.fillStyle = pd === this.page ? '#e05040' : '#b8b8c0'; ctx.fillRect(196 + pd * 8, 12, 5, 3); }
     PK.ui.box(ctx, 96, 26, 140, 130);
     if (this.page === 0) {
       var y = 32;
@@ -197,20 +198,22 @@
       F().draw(ctx, 'HP', 104, y, t.dim); F().right(ctx, k.hp + '/' + k.stats[0], 228, y, t.text, t.shadow);
       hpBar(ctx, 130, y + 9, 98, k.hp, k.stats[0]);
       y += 15;
+      var tm = PK.stats.temperament(k);
       for (var s = 1; s < 6; s++) {
-        F().draw(ctx, PK.STAT_NAMES[s], 104, y, t.dim);
+        var up = tm[1] === s && tm[1] !== tm[2], dn = tm[2] === s && tm[1] !== tm[2];
+        F().draw(ctx, PK.STAT_NAMES[s] + (up ? ' ▲' : dn ? ' ▼' : ''), 104, y, up ? '#d05050' : dn ? '#4a70c8' : t.dim);
         F().right(ctx, String(k.stats[s]), 228, y, t.text, t.shadow);
         y += 10;
       }
       var nxt = k.level >= 100 ? 0 : PK.stats.expFor(k.level + 1) - k.exp;
       F().draw(ctx, 'To next Lv', 104, y + 2, t.dim); F().right(ctx, String(nxt), 228, y + 2, t.text, t.shadow);
       y += 12;
-      F().draw(ctx, 'Item', 104, y, t.dim); F().right(ctx, k.held ? PK.ITEMS[k.held].name : 'None', 228, y, t.text, t.shadow);
+      F().draw(ctx, 'Item', 104, y, t.dim); F().right(ctx, F().fit(k.held ? PK.ITEMS[k.held].name : 'None', 96), 228, y, t.text, t.shadow);
       PK.ui.box(ctx, 4, 102, 88, 54);
       F().draw(ctx, 'Keeper', 10, 108, t.dim);
-      F().draw(ctx, k.ot || PK.game.state.player.name, 10, 118, t.text);
+      F().draw(ctx, F().fit(k.ot || PK.game.state.player.name, 76), 10, 118, t.text);
       if (k.status) statusTag(ctx, k.status, 10, 132);
-      F().draw(ctx, sp.cat, 10, 144, t.dim);
+      F().draw(ctx, F().fit(PK.stats.temperament(k)[0] + ' temper', 76), 10, 144, t.dim);
     } else if (this.page === 1) {
       for (var m = 0; m < 4; m++) {
         var mv = k.moves[m];
@@ -224,6 +227,27 @@
       }
       PK.ui.box(ctx, 4, 102, 88, 54);
       sp.types.forEach(function (ty, j) { typeTag(ctx, ty, 10, 110 + j * 14, 76); });
+    } else if (this.page === 3) {
+      var ab = PK.ABILITIES[PK.stats.ability(k)] || { name: '-', desc: '' };
+      F().draw(ctx, 'Ability', 104, 32, t.dim);
+      F().draw(ctx, ab.name, 104, 43, '#2a70c0', t.shadow);
+      var al = F().wrap(ab.desc, 124);
+      for (var ai = 0; ai < Math.min(2, al.length); ai++) F().draw(ctx, al[ai], 104, 55 + ai * 10, t.text, t.shadow);
+      var tmp = PK.stats.temperament(k);
+      F().draw(ctx, 'Temperament', 104, 80, t.dim);
+      F().draw(ctx, tmp[0], 104, 91, t.text, t.shadow);
+      F().right(ctx, tmp[1] === tmp[2] ? 'No effect' : '+' + PK.STAT_NAMES[tmp[1]] + ' -' + PK.STAT_NAMES[tmp[2]], 228, 91, t.dim);
+      F().draw(ctx, 'Training', 104, 106, t.dim);
+      for (var tq = 0; tq < 6; tq++) {
+        var tx = 104 + (tq % 3) * 42, ty = 117 + Math.floor(tq / 3) * 11;
+        F().draw(ctx, PK.STAT_NAMES[tq], tx, ty, t.dim);
+        F().right(ctx, String(k.tp[tq]), tx + 38, ty, t.text, t.shadow);
+      }
+      PK.ui.box(ctx, 4, 102, 88, 54);
+      F().draw(ctx, 'Training', 10, 108, t.dim);
+      F().draw(ctx, 'Points come', 10, 119, t.text);
+      F().draw(ctx, 'from battles', 10, 129, t.text);
+      F().draw(ctx, 'and Roots.', 10, 139, t.text);
     } else {
       F().draw(ctx, sp.cat + ' Kit', 104, 32, t.dim);
       var lines = F().wrap(sp.dex, 124);
@@ -684,7 +708,7 @@
     F().draw(ctx, 'MONEY', 20, 56, t.dim); F().draw(ctx, '$' + st.money, 80, 56, t.text, t.shadow);
     F().draw(ctx, 'KITLOG', 20, 70, t.dim); F().draw(ctx, Object.keys(st.caught).length + ' caught', 80, 70, t.text, t.shadow);
     F().draw(ctx, 'TIME', 20, 84, t.dim); F().draw(ctx, PK.game.playTime(), 80, 84, t.text, t.shadow);
-    ctx.drawImage(PK.chars.portrait('player', 4, 'down'), 158, 36);
+    ctx.drawImage(PK.chars.portrait('player', 3, 'down'), 166, 36);
     F().draw(ctx, 'CRESTS', 20, 104, t.dim);
     for (var i = 0; i < 8; i++) PK.drawCrest(ctx, 22 + i * 25, 118, i, st.crests[i]);
     if (st.flags.champion) F().draw(ctx, '★ CHAMPION', 150, 104, '#d0a020');

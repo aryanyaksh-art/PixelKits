@@ -6,22 +6,24 @@
   var I = function () { return PK.input; };
 
   var THEME = {
-    frame: '#28304c', frame2: '#8494c4', fill: '#fbfaf2',
-    text: '#383848', shadow: '#d6d4c8', dim: '#a0a0a8', hi: '#d84c3c', sel: '#e8ecfa'
+    frame: '#2c3848', frame2: '#7894bc', frame3: '#c4d4ea', fill: '#fcfcf8',
+    text: '#404048', shadow: '#d4d4cc', dim: '#9a9aa4', hi: '#e05040', sel: '#e4ecf8'
   };
   var DARK = {
-    frame: '#10121c', frame2: '#4c5680', fill: '#262c44',
-    text: '#f4f4f0', shadow: '#10121c', dim: '#8088a8', hi: '#ffd060', sel: '#343c5c'
+    frame: '#10141e', frame2: '#5a6c98', frame3: '#8ca0c8', fill: '#2a3450',
+    text: '#f8f8f8', shadow: '#141a2c', dim: '#8a94b8', hi: '#ffd060', sel: '#3a4668'
   };
 
+  // window frame: dark rim, 2px coloured band with a light inner line, rounded corners
   function box(ctx, x, y, w, h, st) {
     st = st || THEME;
     ctx.fillStyle = st.frame;
-    ctx.fillRect(x + 1, y, w - 2, h); ctx.fillRect(x, y + 1, w, h - 2);
+    ctx.fillRect(x + 2, y, w - 4, h); ctx.fillRect(x, y + 2, w, h - 4); ctx.fillRect(x + 1, y + 1, w - 2, h - 2);
     ctx.fillStyle = st.frame2;
     ctx.fillRect(x + 2, y + 1, w - 4, h - 2); ctx.fillRect(x + 1, y + 2, w - 2, h - 4);
+    if (st.frame3) { ctx.fillStyle = st.frame3; ctx.fillRect(x + 3, y + 2, w - 6, h - 4); ctx.fillRect(x + 2, y + 3, w - 4, h - 6); }
     ctx.fillStyle = st.fill;
-    ctx.fillRect(x + 3, y + 2, w - 6, h - 4); ctx.fillRect(x + 2, y + 3, w - 4, h - 6);
+    ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
   }
 
   function fmt(text) {
@@ -129,10 +131,12 @@
       if (w > mw) mw = w;
     }
     this.colW = this.opts.colW || mw + 16;
-    this.w = this.opts.w || this.colW * this.cols + 12;
+    // never narrower than the widest label (so long names can't spill out), never wider than the screen
+    this.w = Math.min(PK.W - 4, Math.max(this.opts.w || 0, this.colW * this.cols + 12));
     var rows = Math.min(Math.ceil(this.items.length / this.cols), this.maxRows);
     this.h = this.opts.h || rows * this.rowH + 10 + (this.opts.title ? 12 : 0);
     this.x = this.opts.x != null ? this.opts.x : (this.opts.right != null ? this.opts.right - this.w : PK.W - this.w - 4);
+    this.x = Math.max(2, Math.min(this.x, PK.W - this.w - 2));
     this.y = this.opts.y != null ? this.opts.y : (this.opts.bottom != null ? this.opts.bottom - this.h : 4);
     this.clampScroll();
   }
@@ -298,7 +302,7 @@
         F().draw(ctx, row[c], gx + (last ? 4 : 2), gy, sel ? THEME.hi : THEME.text, THEME.shadow);
       }
     }
-    F().draw(ctx, 'Type on keyboard or pick letters. START = done', 8, PK.H - 1 - 7, '#6a7090');
+    F().draw(ctx, 'Type, or pick letters. ENTER = done', 8, PK.H - 1 - 7, '#6a7090');
   };
 
   PK.ui = {

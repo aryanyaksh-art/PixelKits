@@ -46,7 +46,7 @@
       var fr = (PK.frame >> 3) % 4;
       for (var n = 0; n < names.length; n++) {
         var s = PK.chars.sprite(names[n]);
-        var cx = 4 + (n % 8) * 29, cy = 4 + Math.floor(n / 8) * 22;
+        var cx = 4 + (n % 8) * 29, cy = 2 + Math.floor(n / 8) * 26;
         var d = dirs[(this.i % 4 + 4) % 4];
         ctx.drawImage(s[d][[0, 1, 0, 2][fr]], cx, cy);
         ctx.drawImage(s.down[0], cx + 12, cy + 4);

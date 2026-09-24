@@ -39,6 +39,7 @@
       var c = PK.makeCanvas(m.w * TS, m.h * TS);
       var ctx = c.getContext('2d');
       for (y = 0; y < m.h; y++) for (x = 0; x < m.w; x++) PK.tiles.drawMapTile(ctx, m, x, y, x * TS, y * TS, f);
+      PK.tiles.drawTrees(ctx, m, 0, 0, m.w - 1, m.h - 1);
       W.drawBuildings(ctx);
       W.frames.push(c);
     }
@@ -60,6 +61,7 @@
         PK.tiles.drawMapTile(ctx, m, x, y, x * TS, y * TS, f);
       }
       ctx.save(); ctx.beginPath(); ctx.rect((tx - 1) * TS, (ty - 1) * TS, TS * 3, TS * 3); ctx.clip();
+      PK.tiles.drawTrees(ctx, m, tx - 1, ty - 1, tx + 1, ty + 2);
       W.drawBuildings(ctx); ctx.restore();
     });
   };
@@ -90,7 +92,7 @@
       return { d: d, id: d.id || d.key, x: d.x, y: d.y, px: d.x * TS, py: d.y * TS, dir: d.dir || 'down', moving: false, t: 0, hx: d.x, hy: d.y, timer: 60 + PK.rnd(120), sprite: d.sprite || 'boy', emote: null, hidden: false };
     });
     W.prerender();
-    if (!m.interior && W.townPoint(m)) { st.visited = st.visited || {}; st.visited[id] = true; }
+    if (!m.interior) { st.visited = st.visited || {}; st.visited[id] = true; }
     if (!m.interior && !(m.enc && m.enc.cave) && !m.dungeon) st.lastOutdoor = { map: id, x: x, y: y };
     if (m.interior && W.p.bike) W.p.bike = false;
     W.nameT = m.interior ? 0 : 150;
@@ -814,8 +816,8 @@
       }
       var spr = PK.chars.sprite(n.sprite)[n.dir];
       var fr = n.moving ? (n.t < 8 ? 1 + ((n.x + n.y) & 1) : 0) : 0;
-      ctx.drawImage(spr[fr], sx, sy - 4 - (fr ? 1 : 0));
-      if (n.emote) PK.chars.emote(ctx, sx + 2, sy - 20, n.emote);
+      ctx.drawImage(spr[fr], sx, sy - 6 - (fr ? 1 : 0));
+      if (n.emote) PK.chars.emote(ctx, sx + 2, sy - 24, n.emote);
     });
     // tall grass overlay on the player
     var pc = m.at(p.x, p.y);
@@ -872,15 +874,20 @@
     }
     if (p.surf) {
       var bob = (PK.frame >> 4) & 1;
+      ctx.save(); ctx.beginPath(); ctx.rect(sx - 2, sy - 12, 20, 21 + bob); ctx.clip();
+      ctx.drawImage(spr[0], sx, sy - 10 + bob);
+      ctx.restore();
       ctx.fillStyle = '#241c2c'; ctx.fillRect(sx - 1, sy + 7 + bob, 18, 8);
       ctx.fillStyle = '#b07a44'; ctx.fillRect(sx, sy + 8 + bob, 16, 6);
       ctx.fillStyle = '#d09a60'; ctx.fillRect(sx, sy + 8 + bob, 16, 2);
       ctx.fillStyle = '#7a4a26'; ctx.fillRect(sx + 5, sy + 8 + bob, 1, 6); ctx.fillRect(sx + 10, sy + 8 + bob, 1, 6);
-      ctx.save(); ctx.beginPath(); ctx.rect(sx - 2, sy - 8, 20, 17 + bob); ctx.clip();
-      ctx.drawImage(spr[0], sx, sy - 6 + bob);
-      ctx.restore();
-    } else ctx.drawImage(spr[fr], sx, sy - 4 - hop - (fr ? 1 : 0));
-    if (p.emote) PK.chars.emote(ctx, sx + 2, sy - 20, p.emote);
+    } else if (p.bike) {
+      var bs = p.moving ? p.t + p.stepN * 16 : 0;
+      if (p.dir === 'up') PK.chars.drawBike(ctx, sx, sy - 6, p.dir, bs);
+      ctx.drawImage(spr[0], sx, sy - 9 - hop);
+      if (p.dir !== 'up') PK.chars.drawBike(ctx, sx, sy - 6, p.dir, bs);
+    } else ctx.drawImage(spr[fr], sx, sy - 6 - hop - (fr ? 1 : 0));
+    if (p.emote) PK.chars.emote(ctx, sx + 2, sy - 24, p.emote);
   };
 
   PK.Overworld = Overworld;

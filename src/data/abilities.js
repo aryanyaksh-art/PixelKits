@@ -24,7 +24,7 @@
     sapeater: { name: 'Sap Eater', desc: 'Leaf moves heal it instead of hurting.' },
     kindling: { name: 'Kindling', desc: 'Blaze moves power it up instead of hurting.' },
     selfmend: { name: 'Self-Mend', desc: 'Status problems heal when it switches out.' },
-    steadfast: { name: 'Steadfast', desc: 'Foes can\'t lower its stats.' },
+    steadfast: { name: 'Unbending', desc: 'Foes can\'t lower its stats.' },
     imposing: { name: 'Imposing', desc: 'Foes use 2 charges per move against it.' },
     escapeartist: { name: 'Escape Artist', desc: 'Always gets away from wild Kits.' },
     forager: { name: 'Forager', desc: 'Sometimes picks up items after battles.' },
@@ -41,7 +41,7 @@
 
   // Temperaments: [name, raised stat index, lowered stat index] (1 ATK, 2 DEF, 3 TEC, 4 RES, 5 SPD)
   var TEMPERAMENTS = [
-    ['Steady', 0, 0], ['Reckless', 1, 2], ['Gruff', 1, 3], ['Rowdy', 1, 4], ['Stubborn', 1, 5],
+    ['Steady', 0, 0], ['Brazen', 1, 2], ['Gruff', 1, 3], ['Rowdy', 1, 4], ['Stubborn', 1, 5],
     ['Meek', 2, 1], ['Mellow', 0, 0], ['Stoic', 2, 3], ['Wary', 2, 4], ['Stolid', 2, 5],
     ['Bookish', 3, 1], ['Daring', 3, 2], ['Even', 0, 0], ['Dreamy', 3, 4], ['Pensive', 3, 5],
     ['Kindly', 4, 1], ['Proud', 4, 2], ['Patient', 4, 3], ['Placid', 0, 0], ['Serene', 4, 5],

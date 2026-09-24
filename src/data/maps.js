@@ -92,6 +92,18 @@
         }
       }
     }
+    // ground under building footprints matches what surrounds the building
+    (m.buildings || []).forEach(function (b) {
+      if (b.x == null) return;
+      var base = null;
+      var cand = [[b.x - 1, b.y + b.h - 1], [b.x + b.w, b.y + b.h - 1], [b.x + PK.BUILDINGS[b.k].door, b.y + b.h]];
+      for (var i = 0; i < cand.length && !base; i++) {
+        var q = cand[i], r = rows[q[1]] && rows[q[1]][q[0]];
+        if (r === 'g' || r === 'd' || r === '.' || r === ',') base = r === ',' ? '.' : r;
+      }
+      if (!base || base === '.') return;
+      for (var by2 = 0; by2 < b.h; by2++) for (var bx2 = 0; bx2 < b.w; bx2++) if (rows[b.y + by2] && rows[b.y + by2][b.x + bx2] === '.') rows[b.y + by2][b.x + bx2] = base;
+    });
     m.grid = rows.map(function (r) { return r.join(''); });
     m.tiles = rows;
     m.at = function (x, y) {

@@ -6,7 +6,7 @@
   var C = function () { return PK.color; };
 
   // materials
-  var BASE = 0, ACC = 1, BELLY = 2, EYEW = 3, PUPIL = 4, MOUTH = 5, HORN = 6, GLOW = 7, CHEEK = 8, SHINE = 9, DARK = 10, FLAME = 11, LEAF = 12, CRYS = 13, WING = 14;
+  var BASE = 0, ACC = 1, BELLY = 2, EYEW = 3, PUPIL = 4, MOUTH = 5, HORN = 6, GLOW = 7, CHEEK = 8, SHINE = 9, DARK = 10, FLAME = 11, LEAF = 12, CRYS = 13, WING = 14, IRIS = 15, LID = 16;
 
   function palette(spec, prism) {
     var c = spec.c;
@@ -33,6 +33,10 @@
     p[LEAF] = C().ramp(spec.lc || '#4cb04a');
     p[CRYS] = C().ramp(spec.cc || '#8ee0f0').concat(['#ffffff']);
     p[WING] = C().ramp(spec.wc || C().mix(acc, '#ffffff', 0.35));
+    // iris: explicit eye colour, else a deep, saturated version of the accent colour
+    var ic = spec.ic || (spec.ec && spec.ec !== '#1a1426' ? spec.ec : C().shade(C().hueRotate(acc, 0, 1.3, 0), -0.25));
+    p[IRIS] = [C().shade(ic, -0.55), C().shade(ic, -0.3), ic, C().shade(ic, 0.3)];
+    p[LID] = C().shade(base, -0.72);
     return p;
   }
 
@@ -48,6 +52,7 @@
     if (view === 'back') s *= 1.3;
     this.s = s;
     this.prism = prism;
+    this.turn = view === 'front' ? 1 : 0;
   }
   var B = Builder.prototype;
   // transforms from design space (64x64, ground at y=62) to scaled space
@@ -205,54 +210,68 @@
 
   B.eyes = function (G) {
     var t = this.spec.eye || (this.spec.stage === 3 ? 'fierce' : 'round');
+    var turn = this.turn || 0;
     var hx = G.hx, hy = G.hy + (G.eyeDY || 0), r = G.hr, g = this.g, self = this;
     var sep = r * (G.eyeSep || 0.4), ey = hy + r * 0.02;
-    var sz = r * (t === 'big' ? 0.34 : t === 'dot' ? 0.14 : 0.27);
-    function one(cx, side) {
-      var X = self.X(cx), Y = self.Y(ey), R = Math.max(1.2, self.L(sz));
+    var sz = r * (t === 'big' ? 0.36 : t === 'dot' ? 0.15 : 0.29);
+    // side: -1 = the eye nearer the viewer (drawn larger in the 3/4 view)
+    function one(cx, side, scale) {
+      var X = self.X(cx), Y = self.Y(ey), R = Math.max(1.3, self.L(sz) * scale);
       if (t === 'dot') {
-        g.ellipse(X, Y, Math.max(1, R), Math.max(1.2, R * 1.2), PUPIL, { light: 0.5 });
+        g.ellipse(X, Y, Math.max(1, R), Math.max(1.3, R * 1.25), PUPIL, { light: 0.5 });
         g.put(Math.round(X - 0.5), Math.round(Y - R * 0.6), SHINE, 1);
         return;
       }
       if (t === 'sleepy') {
         g.ellipse(X, Y, R * 1.1, R * 0.9, EYEW, { light: 0.9, clip: function (x, y) { return y >= Y; } });
-        g.ellipse(X, Y + R * 0.3, R * 0.55, R * 0.5, PUPIL, { light: 0.5, clip: function (x, y) { return y >= Y; } });
-        g.line(X - R * 1.2, Y, X + R * 1.2, Y, DARK, 0.5, 0.5, { light: 0.5 });
+        g.ellipse(X - side * 0.3, Y + R * 0.35, R * 0.6, R * 0.5, IRIS, { light: 0.55, clip: function (x, y) { return y >= Y; } });
+        g.line(X - R * 1.25, Y, X + R * 1.25, Y, LID, 0.55, 0.55, { light: 0.5 });
         return;
       }
       if (t === 'glow') {
-        g.ellipse(X, Y, R, R * 1.05, GLOW, { light: 0.9 });
-        g.put(Math.round(X - R * 0.4), Math.round(Y - R * 0.5), SHINE, 1);
+        g.ellipse(X, Y, R, R * 1.1, GLOW, { light: 0.95 });
+        g.ellipse(X + 0.3, Y + R * 0.3, R * 0.45, R * 0.5, SHINE, { light: 1 });
         return;
       }
-      var ry = R * (t === 'big' ? 1.15 : 1.1);
+      var ry = R * (t === 'big' ? 1.2 : 1.12);
       var clip = null;
       if (t === 'fierce') {
-        // slanted brow: cut the inner-top part
-        clip = function (x, y) { var inner = side < 0 ? (x + 0.5 - X) : (X - x - 0.5); return (y + 0.5 - Y) > -ry * 0.25 + inner * 0.55; };
+        // slanted brow cuts the inner-top corner
+        clip = function (x, y) { var inner = side < 0 ? (x + 0.5 - X) : (X - x - 0.5); return (y + 0.5 - Y) > -ry * 0.3 + inner * 0.6; };
       }
-      g.ellipse(X, Y, R, ry, EYEW, { light: 0.9, clip: clip });
-      var px = X + side * -R * 0.15, py = Y + ry * 0.12;
-      g.ellipse(px, py, R * (t === 'big' ? 0.7 : 0.58), ry * 0.72, PUPIL, { light: 0.5, clip: clip || function () { return true; } });
-      var sx = Math.round(px - R * 0.3), sy = Math.round(py - ry * 0.35);
-      if (g.get(sx, sy) === PUPIL) g.put(sx, sy, SHINE, 1);
-      if (R > 2.6 && g.get(sx + 1, sy) === PUPIL) g.put(sx + 1, sy, SHINE, 1);
-      if (t === 'fierce') g.line(X - R * 1.1 * -side * -1 - R * 0.1, Y - ry * 0.75 + (side < 0 ? 0 : 0), X + R * 0.9 * side * -1, Y - ry * 0.05, DARK, 0.5, 0.5, { light: 0.4 });
+      g.ellipse(X, Y, R, ry, EYEW, { light: 0.95, clip: clip });
+      // iris looks toward the viewer's left (the direction the Kit faces)
+      var px = X - R * 0.18 - turn * 0.3, py = Y + ry * 0.1;
+      var ir = R * (t === 'big' ? 0.78 : 0.68), iry = ry * 0.8;
+      g.ellipse(px, py, ir, iry, IRIS, { light: 0.62, clip: clip || function () { return true; } });
+      g.ellipse(px, py + iry * 0.15, ir * 0.48, iry * 0.5, PUPIL, { light: 0.4, clip: clip || function () { return true; } });
+      // highlights
+      var sx = Math.round(px - ir * 0.45), sy = Math.round(py - iry * 0.45);
+      if (g.get(sx, sy) === IRIS || g.get(sx, sy) === PUPIL) g.put(sx, sy, SHINE, 1);
+      if (R > 2.4 && (g.get(sx + 1, sy) === IRIS || g.get(sx + 1, sy) === PUPIL)) g.put(sx + 1, sy, SHINE, 1);
+      if (R > 2.4 && (g.get(sx, sy + 1) === IRIS || g.get(sx, sy + 1) === PUPIL)) g.put(sx, sy + 1, SHINE, 1);
+      var s2x = Math.round(px + ir * 0.35), s2y = Math.round(py + iry * 0.45);
+      if (R > 2.8 && g.get(s2x, s2y) === IRIS) g.put(s2x, s2y, SHINE, 1);
+      // upper lid line
+      if (t !== 'fierce') g.line(X - R * 0.95, Y - ry * 0.8, X + R * 0.95, Y - ry * 0.8, LID, 0.5, 0.5, { light: 0.5, clip: function (x, y) { return g.get(x, y) === EYEW || g.get(x, y) === IRIS; } });
+      else g.line(X - R * 1.1 * side * -1, Y - ry * 0.85, X + R * 0.9 * side * -1, Y - ry * 0.1, LID, 0.55, 0.55, { light: 0.4 });
     }
     if (t === 'single') {
-      var X0 = this.X(hx), Y0 = this.Y(ey), R0 = this.L(r * 0.42);
-      g.ellipse(X0, Y0, R0, R0, EYEW, { light: 0.9 });
-      g.ellipse(X0, Y0 + 0.5, R0 * 0.55, R0 * 0.6, PUPIL, { light: 0.5 });
-      g.put(Math.round(X0 - R0 * 0.25), Math.round(Y0 - R0 * 0.3), SHINE, 1);
+      var X0 = this.X(hx - turn * 0.1), Y0 = this.Y(ey), R0 = this.L(r * 0.44);
+      g.ellipse(X0, Y0, R0, R0, EYEW, { light: 0.95 });
+      g.ellipse(X0 - 0.5, Y0 + 0.5, R0 * 0.62, R0 * 0.66, IRIS, { light: 0.6 });
+      g.ellipse(X0 - 0.5, Y0 + 0.8, R0 * 0.3, R0 * 0.32, PUPIL, { light: 0.4 });
+      g.put(Math.round(X0 - R0 * 0.35), Math.round(Y0 - R0 * 0.3), SHINE, 1);
       return;
     }
-    one(hx - sep, -1);
-    one(hx + sep, 1);
+    // 3/4 view: both eyes shift toward the facing side, the far eye is smaller
+    var near = hx - sep * (1 + turn * 0.12) - turn * r * 0.06, far = hx + sep * (1 - turn * 0.2) - turn * r * 0.06;
+    one(near, -1, 1 + turn * 0.06);
+    one(far, 1, 1 - turn * 0.12);
   };
 
   B.mouth = function (G) {
-    var t = this.spec.mouth || 'smile', hx = G.hx, r = G.hr, g = this.g;
+    var t = this.spec.mouth || 'smile', r = G.hr, g = this.g, hx = G.hx - (this.turn || 0) * r * 0.12;
     var my = G.hy + r * (G.mouthDY || 0.48);
     var X = Math.round(this.X(hx)), Y = Math.round(this.Y(my));
     if (t === 'none') return;
@@ -377,22 +396,38 @@
   var PLANS = {};
 
   PLANS.quad = function (b, front) {
+    if (front) return PLANS.quad34(b);
     var G = { bx: 32, by: 45, brx: 16, bry: 10.5, hx: 32, hy: 27, hr: 12.5 };
     if (b.spec.big) { G.brx = 18; G.bry = 12; G.hr = 11.5; G.hy = 29; }
-    if (front) { b.tail(G, true); b.wings(G, true); }
     b.el(20, 53, 4.6, 7, BASE, { bias: -0.12 });
     b.el(44, 53, 4.6, 7, BASE, { bias: -0.12 });
     b.el(G.bx, G.by, G.brx, G.bry, BASE);
-    if (front) {
-      if (b.spec.pat === 'belly' || !b.spec.pat) b.recolor(BASE, BELLY, b.inEl(32, 49, 8, 6));
-    }
     b.pattern(G, front);
     b.el(26.5, 55.5, 4, 6.5, BASE, { edge: true });
     b.el(37.5, 55.5, 4, 6.5, BASE, { edge: true });
-    b.el(26.5, 60, 3.6, 2, BELLY, { light: 0.7 });
-    b.el(37.5, 60, 3.6, 2, BELLY, { light: 0.7 });
-    if (b.has('claws')) [23.5, 26.5, 34.5, 37.5].forEach(function (x) { b.el(x + 1.5, 61.5, 0.9, 0.9, HORN, { light: 0.9 }); });
     b.headBlock(G, front);
+    return G;
+  };
+  // front view of a four-legged Kit in a three-quarter pose: head forward-left, body trailing right
+  PLANS.quad34 = function (b) {
+    var big = !!b.spec.big;
+    var G = { bx: 34, by: 44, brx: big ? 19 : 16.5, bry: big ? 12 : 10, hx: 23, hy: big ? 29 : 30, hr: big ? 12 : 12.5, tx: 44, ty: 42, turned: true };
+    b.tail(G, true); b.wings(G, true);
+    // far legs (shaded, behind the body)
+    b.el(41, 54, 4, 6.8, BASE, { light: 0.3 });
+    b.el(48.5, 52.5, 3.8, 6.2, BASE, { light: 0.25 });
+    b.el(41, 60.3, 3.4, 1.8, BELLY, { light: 0.4 });
+    b.el(48.5, 58.6, 3.2, 1.7, BELLY, { light: 0.35 });
+    b.el(G.bx, G.by, G.brx, G.bry, BASE);
+    if (b.spec.pat === 'belly' || (!b.spec.pat && (b.spec.stage || 1) === 1)) b.recolor(BASE, BELLY, b.inEl(31, 50, 9, 5));
+    b.pattern(G, true);
+    // near legs
+    b.el(21, 55.5, 4.3, 6.8, BASE, { edge: true });
+    b.el(30.5, 56, 4.2, 6.4, BASE, { edge: true });
+    b.el(21, 60.6, 3.8, 2, BELLY, { light: 0.7 });
+    b.el(30.5, 60.8, 3.7, 2, BELLY, { light: 0.7 });
+    if (b.has('claws')) [19, 22.5, 28.5, 32].forEach(function (x) { b.el(x + 0.5, 62, 0.9, 0.9, HORN, { light: 0.9 }); });
+    b.headBlock(G, true);
     return G;
   };
 
@@ -403,7 +438,7 @@
     b.el(26, 56, 4.8, 6.5, BASE, { bias: -0.05 });
     b.el(38, 56, 4.8, 6.5, BASE, { bias: -0.05 });
     b.el(G.bx, G.by, G.brx, G.bry, BASE);
-    if (front && (!b.spec.pat || b.spec.pat === 'belly')) b.recolor(BASE, BELLY, b.inEl(32, 46, G.brx * 0.62, G.bry * 0.7));
+    if (front && (b.spec.pat === 'belly' || (!b.spec.pat && (b.spec.stage || 1) === 1))) b.recolor(BASE, BELLY, b.inEl(31, 46, G.brx * 0.62, G.bry * 0.7));
     b.pattern(G, front);
     b.el(26, 60, 5, 2.4, b.spec.feet ? ACC : BASE, { edge: true, bias: 0.05 });
     b.el(38, 60, 5, 2.4, b.spec.feet ? ACC : BASE, { edge: true, bias: 0.05 });
@@ -588,12 +623,13 @@
 
   // shared head assembly for most plans
   B.headBlock = function (G, front) {
+    if (front && this.turn && !G.turned) { G.hx -= 2; G.turned = true; }
     this.ears(G);
     this.horns(G, false);
     if (this.has('mane')) this.mane(G);
     this.el(G.hx, G.hy, G.hr * (G.hrx || 1.05), G.hr, BASE, { edge: true });
     if (this.spec.muzzle || (this.spec.p === 'quad' && this.spec.muzzle !== false)) {
-      if (front) this.el(G.hx, G.hy + G.hr * 0.45, G.hr * 0.48, G.hr * 0.36, BELLY, { light: 0.72 });
+      if (front) this.el(G.hx - G.hr * 0.12 * this.turn, G.hy + G.hr * 0.45, G.hr * 0.48, G.hr * 0.36, BELLY, { light: 0.72 });
     }
     if (this.spec.pat === 'mask' && front) this.recolor(BASE, ACC, this.inEl(G.hx, G.hy - G.hr * 0.02, G.hr * 1.05, G.hr * 0.3));
     if (this.spec.pat === 'crown') this.recolor(BASE, ACC, function (x, y) { return y < this.Y(G.hy - G.hr * 0.45); }.bind(this));

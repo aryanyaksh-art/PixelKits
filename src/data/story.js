@@ -125,6 +125,7 @@
       await w.give('capsule', 5);
       await w.say('Lumora has eight Gyms. Earn all eight Crests and you may challenge the High Council at Crown Summit.');
       await w.say('The nearest Gym is in Pinecrest, north through Willow Trail. Good luck, {PLAYER}!');
+      await w.say("Oh! And {RIVAL}'s older sibling next door has something for you. Do stop by before you leave town!");
     };
   }
   S.starter1 = chooseStarter(1);

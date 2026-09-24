@@ -280,7 +280,7 @@
     var name = this.label(target), any = false;
     if (!target.alive()) return false;
     if (fromFoe && target.ability() === 'steadfast' && changes.some(function (c) { return c.d < 0; })) {
-      ev.push({ t: 'msg', text: name + "'s Steadfast keeps its stats from dropping!" });
+      ev.push({ t: 'msg', text: name + "'s Unbending keeps its stats from dropping!" });
       return false;
     }
     for (var i = 0; i < changes.length; i++) {

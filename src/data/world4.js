@@ -198,7 +198,7 @@
   K('isle_5', 'Swimmer', 'Marina', 'swimmer', [[108, 58], [65, 58]], { intro: 'The water here is warm all year!', after: 'Time to dry off.' });
   K('isle_6', 'Angler', 'Pike', 'sailor', [[74, 58], [73, 58], [107, 59]], { intro: 'Caught something big today. It\'s you!', after: 'The one that got away...' });
   K('isle_7', 'Occultist', 'Wren', 'occult', [[106, 59], [61, 59], [36, 60]], { intro: 'The moon is watching us...', after: 'The moon has seen enough.' });
-  K('isle_duo2', 'Agents', 'Syndicate', 'agent', [[80, 59], [84, 59], [53, 60]], { double: true, partner: { name: 'Syndicate', sprite: 'agent' }, intro: 'You won\'t reach Vesper!', after: 'Vesper will finish you off...', music: 'syndicate', title2: 'Agent' });
+  K('isle_duo2', 'Agents', 'Kade', 'agent', [[80, 59], [84, 59], [53, 60]], { double: true, partner: { name: 'Mara', sprite: 'agent' }, intro: 'You won\'t reach Vesper!', after: 'Vesper will finish you off...', music: 'syndicate', title2: 'Agent' });
   K('isle_8', 'Agent', 'Syndicate', 'agent', [[18, 60], [36, 60]], { intro: 'Hollow Isle belongs to the Syndicate now!', after: 'Ugh... the Admin will be furious.', music: 'syndicate', reward: 40 });
   K('isle_boss', 'Admin', 'Vesper', 'agent', [[80, 63], [106, 64], [61, 64], [104, 65], [36, 66]], { double: true, partner: { name: 'Grunt Tallis', sprite: 'agent', lose: 'TALLIS: Admin, retreat!' }, ai: 2, items: 2, music: 'syndicate', reward: 80, lose: 'VESPER: I... lost?' });
   K('isle_9', 'Ranger', 'Faye', 'girl', [[109, 60], [105, 60], [78, 61]], { intro: 'Hollow Woods are sacred. Show me your respect in battle!', after: 'You fought with honor.' });
@@ -385,8 +385,8 @@
     entry: [6, 8],
     npcs: {
       a: { id: 'vesper', sprite: 'agent', dir: 'down', hideIf: 'vesper_done', talk: 'vesper' },
-      m: { id: 'grunt', sprite: 'agent', dir: 'right', keeper: 'isle_duo2', sight: 3, hideIf: 'vesper_done' },
-      n: { sprite: 'agent', dir: 'left', keeper: 'isle_duo2', sight: 3, hideIf: 'vesper_done' }
+      m: { id: 'grunt', sprite: 'agent', dir: 'right', keeper: 'isle_duo2', sight: 4, hideIf: 'vesper_done' },
+      n: { sprite: 'agent', dir: 'left', keeper: 'isle_duo2', sight: 4, hideIf: 'vesper_done' }
     }
   });
   D('hollow_isle_woods', {

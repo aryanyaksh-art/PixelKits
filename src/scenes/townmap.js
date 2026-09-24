@@ -40,8 +40,12 @@
       var m = PK.MAPS[id];
       if (!m) return null;
       if (m.mapNode) return m.mapNode;
-      if (m.exit) id = m.exit.map;
-      else break;
+      if (m.exit) { id = m.exit.map; continue; }
+      // multi-floor buildings: follow a staircase down towards the entrance
+      PK.buildMap(m);
+      var w = Object.keys(m.warpDefs || {}).map(function (k) { return m.warpDefs[k].to; })[0];
+      if (!w) break;
+      id = w;
     }
     return BY_ID[id] ? id : null;
   }
@@ -138,7 +142,7 @@
     // player position
     if (this.here && BY_ID[this.here] && ((PK.frame >> 4) % 3)) {
       var h = BY_ID[this.here];
-      ctx.drawImage(PK.chars.sprite('player').down[0], h[1] - 8, h[2] - 18);
+      ctx.drawImage(PK.chars.sprite('player').down[0], h[1] - 8, h[2] - 22);
     }
     // cursor
     var cur = this.list[this.i];
