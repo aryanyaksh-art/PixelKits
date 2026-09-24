@@ -1,0 +1,66 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #0d0f18;
+  height: 100%;
+  overflow: hidden;
+  font-family: system-ui, sans-serif;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+#screen {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #000;
+  box-shadow: 0 0 0 2px #1c2030, 0 10px 40px rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+}
+#touchpad {
+  display: none;
+  width: 100%;
+  max-width: 520px;
+  height: 180px;
+  position: relative;
+  margin-top: 8px;
+}
+body.touch #touchpad { display: block; }
+.tbtn {
+  position: absolute;
+  background: #2a2f46;
+  color: #c8cce0;
+  border: 2px solid #3c4260;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 3px 0 #151826;
+}
+.tbtn.on { background: #4a5278; transform: translateY(2px); box-shadow: none; }
+.dpad { width: 52px; height: 52px; }
+#t-up { left: 70px; top: 10px; }
+#t-down { left: 70px; top: 114px; }
+#t-left { left: 18px; top: 62px; }
+#t-right { left: 122px; top: 62px; }
+.round { width: 64px; height: 64px; border-radius: 50%; }
+#t-a { right: 20px; top: 34px; background: #a83a4a; border-color: #c85a6a; }
+#t-b { right: 96px; top: 72px; background: #3a6aa8; border-color: #5a8ac8; }
+.small { width: 70px; height: 28px; border-radius: 14px; font-size: 11px; }
+#t-start { left: 50%; margin-left: 4px; top: 146px; }
+#t-select { left: 50%; margin-left: -74px; top: 146px; }
+#hint {
+  color: #5a6080;
+  font-size: 12px;
+  margin-top: 10px;
+  text-align: center;
+}
+body.touch #hint { display: none; }

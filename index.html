@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>PixelKits</title>
+  <meta name="description" content="PixelKits - an original retro creature-collecting RPG that runs in your browser.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game">
+    <canvas id="screen" width="240" height="160"></canvas>
+    <div id="touchpad">
+      <div class="tbtn dpad" id="t-up">&#9650;</div>
+      <div class="tbtn dpad" id="t-left">&#9664;</div>
+      <div class="tbtn dpad" id="t-right">&#9654;</div>
+      <div class="tbtn dpad" id="t-down">&#9660;</div>
+      <div class="tbtn round" id="t-b">B</div>
+      <div class="tbtn round" id="t-a">A</div>
+      <div class="tbtn small" id="t-select">RUN</div>
+      <div class="tbtn small" id="t-start">MENU</div>
+    </div>
+    <div id="hint">Arrows/WASD: move &middot; Z/Space: A &middot; X/Esc: B &middot; Enter: Menu &middot; Shift: Run</div>
+  </div>
+  <!-- engine -->
+  <script src="src/engine/core.js"></script>
+  <script src="src/engine/input.js"></script>
+  <script src="src/engine/renderer.js"></script>
+  <script src="src/engine/rng.js"></script>
+  <script src="src/engine/font.js"></script>
+  <script src="src/engine/audio.js"></script>
+  <!-- graphics -->
+  <script src="src/gfx/color.js"></script>
+  <script src="src/gfx/pixel.js"></script>
+  <script src="src/gfx/tiles.js"></script>
+  <script src="src/gfx/buildings.js"></script>
+  <script src="src/gfx/chars.js"></script>
+  <script src="src/gfx/kitArt.js"></script>
+  <script src="src/gfx/battleFx.js"></script>
+  <!-- data -->
+  <script src="src/data/types.js"></script>
+  <script src="src/data/moves.js"></script>
+  <script src="src/data/kits.js"></script>
+  <script src="src/data/items.js"></script>
+  <script src="src/data/trainers.js"></script>
+  <script src="src/data/music.js"></script>
+  <script src="src/data/maps.js"></script>
+  <script src="src/data/world1.js"></script>
+  <script src="src/data/world2.js"></script>
+  <script src="src/data/world3.js"></script>
+  <script src="src/data/story.js"></script>
+  <!-- systems -->
+  <script src="src/systems/stats.js"></script>
+  <script src="src/systems/battleEngine.js"></script>
+  <script src="src/systems/game.js"></script>
+  <!-- ui + scenes -->
+  <script src="src/ui/ui.js"></script>
+  <script src="src/ui/touch.js"></script>
+  <script src="src/scenes/overworld.js"></script>
+  <script src="src/scenes/battle.js"></script>
+  <script src="src/scenes/menus.js"></script>
+  <script src="src/scenes/title.js"></script>
+  <script src="src/scenes/debug.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>
