@@ -385,7 +385,7 @@
     },
     edges: { s: { to: 'tidewind_trail', off: 0 } }
   });
-  IN('vm_clinic', 'clinic', { name: 'Voltmere Clinic' });
+  IN('vm_clinic', 'clinic', { name: 'Voltmere Clinic', people: [{ x: 8, y: 5, sprite: 'hiker', dir: 'left', talk: PK.story.gift('got_wayfinder', 'wayfinder', "Three crests already? You're going places! Take my Wayfinder - it can whisk you back to any town you've visited.", 'Use the Wayfinder from your Bag while outdoors.', function () { return PK.game.state.crests[2]; }, "I've traveled all over Lumora. Earn the Spark Crest and I'll share my secret for getting around fast.") }] });
   IN('vm_shop', 'shop', { name: 'Voltmere Shop', stock: ['capsule', 'pluscapsule', 'tonic', 'hitonic', 'remedy', 'rekindle', 'hushspray', 'smokepellet'] });
   IN('vm_house', 'house', { name: "Keeper's Lodge", people: [{ x: 5, y: 3, sprite: 'oldman', dir: 'down', talk: PK.story.gift('got_clover', 'luckyclover', 'I was a keeper, long ago. Here, take my old lucky charm - a Lucky Clover!', 'A Kit holding the Lucky Clover earns extra EXP. It helped me more than once.') }] });
   D('vm_gym', {

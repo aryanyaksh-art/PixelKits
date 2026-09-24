@@ -88,10 +88,30 @@
       return { d: d, id: d.id || d.key, x: d.x, y: d.y, px: d.x * TS, py: d.y * TS, dir: d.dir || 'down', moving: false, t: 0, hx: d.x, hy: d.y, timer: 60 + PK.rnd(120), sprite: d.sprite || 'boy', emote: null, hidden: false };
     });
     W.prerender();
+    if (!m.interior && W.townPoint(m)) { st.visited = st.visited || {}; st.visited[id] = true; }
     W.nameT = m.interior ? 0 : 150;
     W.initWeather();
     W.playMapMusic();
     W.syncPlayer();
+  };
+  // Arrival point for fast travel: just below the town's clinic door (or home in Brookhollow)
+  W.townPoint = function (m) {
+    PK.buildMap(m);
+    var b = (m.buildings || []).filter(function (b) { return b.k === 'clinic'; })[0];
+    if (!b && m.id === 'brookhollow') b = m.buildings[0];
+    if (!b) return null;
+    return [b.x + PK.BUILDINGS[b.k].door, b.y + b.h];
+  };
+  W.fastTravel = async function () {
+    var st = PK.game.state;
+    if (W.map.interior || W.map.enc && W.map.enc.cave) return PK.ui.say('The Wayfinder needs open sky to work.');
+    var ids = Object.keys(PK.MAPS).filter(function (id) { return st.visited && st.visited[id] && W.townPoint(PK.MAPS[id]); });
+    var i = await PK.ui.menu(ids.map(function (id) { return PK.MAPS[id].name; }).concat(['CANCEL']), { x: 8, y: 8, title: 'Travel where?', maxRows: 9 });
+    if (i < 0 || i >= ids.length) return;
+    var pt = W.townPoint(PK.MAPS[ids[i]]);
+    if (PK.audio) PK.audio.sfx('statup');
+    W.p.surf = false;
+    await W.warp(ids[i], pt[0], pt[1], 'down', { silent: true });
   };
   W.playMapMusic = function () {
     var m = W.map;

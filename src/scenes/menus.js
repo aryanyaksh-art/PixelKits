@@ -304,7 +304,8 @@
       return PK.ui.say(PK.stats.name(gk) + ' is now holding the ' + it.name + '.');
     }
     if (act !== 'USE') return;
-    return useField(id);
+    await useField(id);
+    if (PK.menus.pendingAction) this.close(null);
   };
   function itemHasEffect(it, k) {
     if (it.use === 'heal') return k.hp > 0 && k.hp < k.stats[0];
@@ -347,6 +348,7 @@
       return PK.menus.learnMove(dk, it.value);
     }
     if (id === 'kitlog') return PK.menus.kitlog();
+    if (id === 'wayfinder') { PK.menus.pendingAction = PK.world.fastTravel; return; }
     if (it.pocket === 'key') return PK.ui.say('Face an obstacle and press A to use the ' + it.name + '.');
     if (it.use === 'capsule' || it.use === 'escape') return PK.ui.say('That can only be used in battle.');
   }
@@ -714,6 +716,7 @@
         if (a === 'log') await PK.menus.kitlog();
         if (a === 'kits') await PK.menus.party({ mode: 'field' });
         if (a === 'bag') await PK.menus.bag({ mode: 'field' });
+        if (PK.menus.pendingAction) { var pa = PK.menus.pendingAction; PK.menus.pendingAction = null; await pa(); return; }
         if (a === 'card') await PK.menus.card();
         if (a === 'opt') await options();
         if (a === 'debug') { await PK.debugMenu(); return; }

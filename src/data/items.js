@@ -40,6 +40,7 @@
   it('pickaxe', 'Pickaxe', 'key', 0, 'key', 0, 'Breaks cracked rocks.');
   it('raft', 'Raft', 'key', 0, 'key', 0, 'A folding raft for crossing water.');
   it('spirekey', 'Spire Keycard', 'key', 0, 'key', 0, 'Opens locked doors in the Syndicate Spire.');
+  it('wayfinder', 'Wayfinder', 'key', 0, 'key', 0, 'Instantly returns you to any town you have visited.');
   it('oldmap', 'Old Star Map', 'key', 0, 'key', 0, 'A map pointing to ruins beyond the southern sea.');
 
   // Skill Discs (reusable): teach a move

@@ -20,6 +20,7 @@
       caught: {},
       defeated: {},
       picked: {},
+      visited: { brookhollow: true },
       frames: 0,
       steps: 0,
       hush: 0,

@@ -32,6 +32,7 @@ html, body {
   margin-top: 8px;
 }
 body.touch #touchpad { display: block; }
+body.touch #game { justify-content: flex-start; padding-top: 16px; box-sizing: border-box; }
 .tbtn {
   position: absolute;
   background: #2a2f46;
