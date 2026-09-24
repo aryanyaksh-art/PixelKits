@@ -39,7 +39,7 @@
       e: { sprite: 'skier', dir: 'left', keeper: 'frost_2', sight: 4 },
       o: { sprite: 'brawler', dir: 'right', keeper: 'frost_4', sight: 4 },
       s: { sprite: 'oldman', dir: 'right', keeper: 'frost_3', sight: 2 },
-      m: { sprite: 'skier', dir: 'left', keeper: 'frost_duo', sight: 3 },
+      m: { sprite: 'skier', dir: 'left', keeper: 'frost_duo', sight: 5 },
       n: { sprite: 'skier', dir: 'left', keeper: 'frost_duo', sight: 3 }
     },
     edges: { s: { to: 'mirage_city', off: 4 }, n: { to: 'rimeholt', off: 0 } },
