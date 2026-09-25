@@ -686,7 +686,7 @@
         await PK.ui.say(PK.stats.name(k) + ' was withdrawn.');
       } else if (c === 1) {
         if (st.party.length <= 1) { await PK.ui.say("You can't deposit your last Kit!"); continue; }
-        var pi = await PK.menus.party({ mode: 'item' });
+        var pi = await pickBox('Deposit which Kit?', st.party);
         if (pi < 0) continue;
         if (st.party.filter(function (x, j) { return j !== pi && x.hp > 0; }).length === 0) { await PK.ui.say('You need at least one healthy Kit in your party!'); continue; }
         var dk = st.party.splice(pi, 1)[0];
@@ -705,15 +705,77 @@
       } else return;
     }
   }
-  async function pickBox(title) {
+  // Storage screen: list of Kits with a picture, types, ability, item and KitLog entry for the highlighted one
+  function StoreView(list, title, done) {
+    this.opaque = true; this.list = list; this.title = title; this.done = done;
+    this.i = 0; this.scroll = 0;
+  }
+  StoreView.prototype.update = function () {
+    var inp = PK.input, n = this.list.length;
+    if (inp.rep('up') && n) { this.i = (this.i - 1 + n) % n; if (PK.audio) PK.audio.sfx('move'); }
+    if (inp.rep('down') && n) { this.i = (this.i + 1) % n; if (PK.audio) PK.audio.sfx('move'); }
+    if (inp.rep('left') && n) { this.i = Math.max(0, this.i - 9); if (PK.audio) PK.audio.sfx('move'); }
+    if (inp.rep('right') && n) { this.i = Math.min(n - 1, this.i + 9); if (PK.audio) PK.audio.sfx('move'); }
+    if (this.i < this.scroll) this.scroll = this.i;
+    if (this.i >= this.scroll + 9) this.scroll = this.i - 8;
+    if (inp.ok() && n) { if (PK.audio) PK.audio.sfx('select'); PK.pop(this); this.done(this.i); }
+    else if (inp.cancel()) { if (PK.audio) PK.audio.sfx('back'); PK.pop(this); this.done(-1); }
+  };
+  StoreView.prototype.draw = function (ctx) {
+    var t = T(), list = this.list;
+    bgPattern(ctx, '#7a6ab8', '#7264b0');
+    PK.ui.box(ctx, 4, 4, 232, 18);
+    F().draw(ctx, this.title, 12, 9, t.text, t.shadow);
+    F().right(ctx, list.length + ' Kit' + (list.length === 1 ? '' : 's'), 228, 9, t.dim);
+    PK.ui.box(ctx, 4, 24, 96, 132);
+    for (var r = 0; r < 9; r++) {
+      var idx = this.scroll + r, k = list[idx];
+      if (!k) break;
+      var y = 30 + r * 14;
+      if (idx === this.i) { ctx.fillStyle = t.sel; ctx.fillRect(7, y - 2, 90, 13); F().draw(ctx, '▶', 9, y + 1, t.hi); }
+      F().draw(ctx, F().fit(PK.stats.name(k), 50), 16, y + 1, k.hp > 0 ? t.text : t.dim, t.shadow);
+      F().right(ctx, 'Lv' + k.level, 95, y + 1, t.dim);
+    }
+    if (this.scroll > 0) F().draw(ctx, '▲', 86, 25, t.hi);
+    if (this.scroll + 9 < list.length) F().draw(ctx, '▼', 86, 147, t.hi);
+    PK.ui.box(ctx, 102, 24, 134, 132);
+    var cur = list[this.i];
+    if (!cur) { F().center(ctx, 'Empty', 169, 86, t.dim); return; }
+    PK.stats.upgrade(cur);
+    var sp = PK.KITS[cur.id];
+    ctx.fillStyle = '#dfe9f6'; ctx.fillRect(107, 29, 64, 62);
+    ctx.drawImage(PK.kitArt.get(cur.id, 'front', cur.prism, cur.tint), 107, 27);
+    if (cur.prism) F().draw(ctx, '★', 162, 31, '#e0a020');
+    F().draw(ctx, F().fit(PK.stats.name(cur), 58), 175, 30, t.text, t.shadow);
+    if (cur.nick) F().draw(ctx, F().fit(sp.name, 58), 175, 40, t.dim);
+    F().draw(ctx, 'Lv' + cur.level, 175, cur.nick ? 50 : 40, t.text, t.shadow);
+    sp.types.forEach(function (ty, j) { typeTag(ctx, ty, 175, 62 + j * 13, 56); });
+    var ab = PK.ABILITIES[PK.stats.ability(cur)];
+    F().draw(ctx, F().fit('HP ' + cur.hp + '/' + cur.stats[0], 58), 175, 88, t.dim);
+    if (cur.status) statusTag(ctx, cur.status, 210, 50);
+    F().draw(ctx, F().fit('Ability: ' + (ab ? ab.name : '-'), 124), 108, 97, t.text, t.shadow);
+    F().draw(ctx, F().fit('Item: ' + (cur.held ? PK.ITEMS[cur.held].name : 'None'), 124), 108, 107, t.text, t.shadow);
+    var dl = F().wrap(sp.dex, 124);
+    if (dl.length > 4) { dl = dl.slice(0, 4); dl[3] = F().fit(dl[3] + '...', 124); }
+    for (var q = 0; q < dl.length; q++) F().draw(ctx, dl[q], 108, 118 + q * 9, t.dim);
+  };
+  function storeView(list, title) { return new Promise(function (res) { PK.push(new StoreView(list, title, res)); }); }
+
+  async function pickBox(title, list) {
     var st = PK.game.state;
-    var items = st.box.map(function (k) { return { label: PK.stats.name(k), right: 'Lv' + k.level }; });
+    list = list || st.box;
+    var sv = null;
     for (;;) {
-      var i = await PK.ui.menu(items, { x: 70, y: 4, w: 166, maxRows: 10, title: title });
+      var i = await storeView(list, title);
       if (i < 0) return -1;
+      // keep the preview visible behind the choice menu
+      sv = new StoreView(list, title, function () {});
+      sv.i = i; sv.scroll = Math.max(0, i - 8); sv.update = function () {};
+      PK.push(sv);
       var c = await PK.ui.menu(['SELECT', 'SUMMARY', 'CANCEL'], { right: 236, bottom: 156 });
+      PK.pop(sv);
       if (c === 0) return i;
-      if (c === 1) await summary(i, st.box);
+      if (c === 1) await summary(i, list);
     }
   }
 
