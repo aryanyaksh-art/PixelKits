@@ -60,6 +60,7 @@ python tools/serve.py
 node tools/validate.mjs   # checks all data: maps, warps, edges, reachability, trainers, items, music
 node tools/sim.mjs 3000   # headless battle simulator (stress test + balance numbers)
 node tools/balance.mjs    # typical player team vs every boss
+node tools/npcblock.mjs   # finds trainers/NPCs that block a path when standing at their posts
 ```
 
 Debug mode: open `index.html?debug=1` for a **DEBUG** entry in the in-game menu (warp, heal, levels, items) and press <kbd>`</kbd> to toggle 4× speed. Art galleries: `?gallery=kits`, `?gallery=tiles`, `?gallery=chars`, `?gallery=buildings`.

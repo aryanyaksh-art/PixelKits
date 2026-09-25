@@ -215,7 +215,7 @@
       'Wll.lll.llW',
       'W.........W',
       'Wl.lllllllW',
-      'W..e......W',
+      'We........W',
       'Wllllll.llW',
       'W...m.....W',
       'W.lllllll.W',
