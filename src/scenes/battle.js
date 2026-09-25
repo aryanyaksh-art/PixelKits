@@ -81,7 +81,7 @@
   S.bt = function (key) { return this.b.byKey(key); };
   S.kitImg = function (key) {
     var k = this.bt(key).kit();
-    return PK.kitArt.get(k.id, key[0] === 'e' ? 'front' : 'back', k.prism);
+    return PK.kitArt.get(k.id, key[0] === 'e' ? 'front' : 'back', k.prism, k.tint);
   };
   S.center = function (key) {
     var g = this.pos[key] || this.pos[key[0] + '0'];
@@ -819,6 +819,13 @@
           if (j === this.moveCursor) F().draw(ctx, '▶', mx - 8, my, T.hi);
           F().draw(ctx, mv ? F().fit(PK.MOVES[mv.id].name, 68) : '-', mx, my, mv && mv.pp === 0 ? T.dim : T.text, T.shadow);
         }
+      }
+      var cm = k.moves[this.moveCursor];
+      if (cm && this.mode === 'moves') {
+        var dl = F().wrap(PK.moveUI.fullDesc(PK.MOVES[cm.id]), 150).slice(0, 3);
+        var bh = dl.length * 10 + 8;
+        PK.ui.box(ctx, 4, 116 - bh, 162, bh);
+        for (var q = 0; q < dl.length; q++) F().draw(ctx, dl[q], 11, 116 - bh + 5 + q * 10, T.text, T.shadow);
       }
       PK.ui.box(ctx, 166, 116, 70, 42);
       var cur = k.moves[this.moveCursor];

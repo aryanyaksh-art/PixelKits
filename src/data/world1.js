@@ -164,7 +164,7 @@
   IN('pc_clinic', 'clinic', { name: 'Pinecrest Clinic', people: [{ x: 8, y: 5, sprite: 'boy', move: 'wander', text: 'The terminal in the corner lets you store extra Kits. Handy!' }, { x: 1, y: 3, sprite: 'scholar', dir: 'right', talk: PK.story.gift('got_lens', 'seekerlens', "I'm one of Prof. Vale's aides! You've caught 10 kinds of Kits? Then take this Seeker Lens. It glows when something is hidden nearby.", 'Use the Seeker Lens from your Bag. Items are often hidden in odd corners!', function () { return Object.keys(PK.game.state.caught).length >= 10; }, "I'm one of Prof. Vale's aides. Catch 10 kinds of Kits and I'll give you a handy tool!") }] });
   IN('pc_shop', 'shop', { name: 'Pinecrest Shop', stock: ['capsule', 'tonic', 'remedy', 'hushspray'] });
   IN('pc_woodcutter', 'house', { name: "Woodcutter's House", people: [{ x: 5, y: 3, sprite: 'hiker', dir: 'down', talk: S('pc_woodcutter') }] });
-  IN('pc_house', 'house2', { name: 'Cozy House', items: [], people: [{ x: 3, y: 2, sprite: 'girl', dir: 'down', talk: PK.story.gift('got_healroot', 'healroot', 'You look like you travel a lot. Take this Healroot! Let a Kit hold it in battle.', 'A Kit holding a Healroot eats it when its HP gets low.') }] });
+  IN('pc_house', 'house2', { name: 'Cozy House', items: [], people: [{ x: 3, y: 2, sprite: 'girl', dir: 'down', talk: PK.story.gift('got_healroot', 'healroot', 'You look like you travel a lot. Take this Healroot! Let a Kit hold it in battle.', 'A Kit holding a Healroot eats it when its HP gets low.') }, { x: 6, y: 4, sprite: 'oldwoman', dir: 'left', talk: 'name_sage' }] });
   D('pc_gym', {
     name: 'Pinecrest Gym', interior: true, theme: 'gym_Leaf', music: 'town',
     rows: [

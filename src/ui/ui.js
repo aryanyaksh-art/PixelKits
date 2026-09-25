@@ -191,6 +191,15 @@
     }
     if (this.scroll > 0) F().draw(ctx, '▲', this.x + this.w - 12, this.y + 3, this.st.hi);
     if (end < this.items.length) F().draw(ctx, '▼', this.x + this.w - 12, this.y + this.h - 9, this.st.hi);
+    // optional description panel for the highlighted entry
+    if (this.opts.info) {
+      var info = this.opts.info(this.index);
+      if (info) {
+        box(ctx, 4, PK.H - 30, PK.W - 8, 28);
+        var il = F().wrap(info, PK.W - 26);
+        for (var q = 0; q < Math.min(2, il.length); q++) F().draw(ctx, il[q], 12, PK.H - 24 + q * 10, THEME.text, THEME.shadow);
+      }
+    }
   };
 
   // ---------------- Number picker ----------------
@@ -291,18 +300,18 @@
     F().draw(ctx, shown, 12, 23, THEME.text, THEME.shadow);
     if (this.def && !this.name) F().draw(ctx, '(blank = ' + this.def + ')', 120, 23, THEME.dim);
     var grid = this.rows();
-    box(ctx, 4, 42, 232, 114);
+    box(ctx, 4, 42, 232, 106);
     for (var r = 0; r < grid.length; r++) {
       var row = grid[r];
       var last = r === grid.length - 1;
       for (var c = 0; c < row.length; c++) {
-        var gx = last ? 14 + c * 44 : 20 + c * 23, gy = last ? 138 : 52 + r * 16;
+        var gx = last ? 14 + c * 44 : 20 + c * 23, gy = last ? 132 : 52 + r * 16;
         var sel = r === this.cy && c === this.cx;
         if (sel) { ctx.fillStyle = THEME.sel; ctx.fillRect(gx - 4, gy - 3, last ? 36 : 17, 13); }
         F().draw(ctx, row[c], gx + (last ? 4 : 2), gy, sel ? THEME.hi : THEME.text, THEME.shadow);
       }
     }
-    F().draw(ctx, 'Type, or pick letters. ENTER = done', 8, PK.H - 1 - 7, '#6a7090');
+    F().draw(ctx, 'Type, or pick letters. ENTER = done', 8, PK.H - 9, '#4a5070');
   };
 
   PK.ui = {
@@ -347,8 +356,9 @@
     number: function (opts) {
       return new Promise(function (res) { PK.push(new NumberPick(opts, res)); });
     },
-    name: function (title, def, presets) {
-      return new Promise(function (res) { PK.push(new NameEntry(title, def, presets, res)); });
+    // initial: text already in the field (e.g. the current nickname)
+    name: function (title, def, presets, initial) {
+      return new Promise(function (res) { var ne = new NameEntry(title, def, presets, res); ne.name = initial || ''; PK.push(ne); });
     }
   };
 })();

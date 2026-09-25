@@ -32,7 +32,7 @@
     F().draw(ctx, PK.battleUtil.ST_NAME[st], x + 2, y + 1, '#ffffff');
   }
   function drawIcon(ctx, k, x, y, size) {
-    var ic = PK.kitArt.icon(k.id, k.prism);
+    var ic = PK.kitArt.icon(k.id, k.prism, k.tint);
     var bob = k.hp > 0 && ((PK.frame >> 3) & 1) ? -1 : 0;
     ctx.drawImage(ic, x, y + bob, size || 24, size || 24);
   }
@@ -113,10 +113,11 @@
       if (c === 1) return summary(this.i);
       return;
     }
-    var items = ['SUMMARY', 'SWITCH', 'ITEM', 'CANCEL'];
+    var items = ['SUMMARY', 'SWITCH', 'ITEM', 'EDIT', 'CANCEL'];
     var ch = await PK.ui.menu(items, { right: 236, bottom: 136 });
     if (ch === 0) return summary(this.i);
     if (ch === 1) { this.swapFrom = this.i; return; }
+    if (ch === 3) return PK.moveUI.editKit(k);
     if (ch === 2) {
       var h = await PK.ui.menu(['GIVE', 'TAKE', 'CANCEL'], { right: 236, bottom: 136 });
       if (h === 0) {
@@ -159,7 +160,7 @@
       if (k.hp <= 0) { ctx.fillStyle = '#e84838'; ctx.fillRect(100, y + 10, 19, 9); F().draw(ctx, 'KO', 104, y + 11, '#fff'); }
     }
     PK.ui.box(ctx, 4, 136, 232, 22);
-    var msg = this.swapFrom >= 0 ? 'Move to where?' : this.opts.forced ? 'Choose the next Kit.' : this.opts.mode === 'item' ? 'Use on which Kit?' : this.opts.mode === 'disc' ? 'Teach which Kit?' : this.opts.mode === 'give' ? 'Give to which Kit?' : 'Choose a Kit.';
+    var msg = this.swapFrom >= 0 ? 'Move to where?' : this.opts.forced ? 'Choose the next Kit.' : this.opts.mode === 'item' ? 'Use on which Kit?' : this.opts.mode === 'disc' ? 'Teach ' + PK.MOVES[this.opts.move].name + ' to which Kit?' : this.opts.mode === 'give' ? 'Give to which Kit?' : 'Choose a Kit.';
     F().draw(ctx, msg, 12, 143, t.text, t.shadow);
   };
 
@@ -172,6 +173,14 @@
     if (inp.rep('right')) { this.page = (this.page + 1) % 4; if (PK.audio) PK.audio.sfx('move'); }
     if (inp.rep('up')) { this.i = (this.i - 1 + n) % n; if (PK.audio) PK.audio.sfx('move'); }
     if (inp.rep('down')) { this.i = (this.i + 1) % n; if (PK.audio) PK.audio.sfx('move'); }
+    if (this.busy) return;
+    if (inp.ok() && this.page === 1) {
+      var self = this, list = this.list || PK.game.state.party, k = list[this.i];
+      if (PK.audio) PK.audio.sfx('select');
+      this.busy = true;
+      PK.moveUI.moveList({ kit: k, mode: 'edit', title: PK.stats.name(k) + "'s moves", hint: 'A: swap or forget the selected move.  B: back' }).then(function () { self.busy = false; });
+      return;
+    }
     if (inp.cancel() || inp.ok()) { if (PK.audio) PK.audio.sfx('back'); PK.pop(this); if (this.done) this.done(); }
   };
   Summary.prototype.draw = function (ctx) {
@@ -181,7 +190,7 @@
     bgPattern(ctx, '#e8c070', '#e2b862');
     PK.ui.box(ctx, 4, 4, 88, 96);
     ctx.fillStyle = '#dfe9f6'; ctx.fillRect(7, 7, 82, 68);
-    ctx.drawImage(PK.kitArt.get(k.id, 'front', k.prism), 12, 8);
+    ctx.drawImage(PK.kitArt.get(k.id, 'front', k.prism, k.tint), 12, 8);
     F().draw(ctx, 'No.' + ('00' + k.id).slice(-3), 9, 78, t.dim);
     if (k.prism) F().draw(ctx, '★', 80, 78, '#e0a020');
     F().draw(ctx, F().fit(PK.stats.name(k), 78), 9, 88, t.text, t.shadow);
@@ -227,6 +236,7 @@
       }
       PK.ui.box(ctx, 4, 102, 88, 54);
       sp.types.forEach(function (ty, j) { typeTag(ctx, ty, 10, 110 + j * 14, 76); });
+      F().draw(ctx, 'A: details', 10, 142, t.dim);
     } else if (this.page === 3) {
       var ab = PK.ABILITIES[PK.stats.ability(k)] || { name: '-', desc: '' };
       F().draw(ctx, 'Ability', 104, 32, t.dim);
@@ -445,6 +455,10 @@
     PK.ui.box(ctx, 4, 128, 232, 30);
     var cur = list[this.i];
     var desc = cur ? PK.ITEMS[cur].desc : 'Close the bag.';
+    if (cur && PK.ITEMS[cur].pocket === 'discs') {
+      var dm = PK.MOVES[PK.ITEMS[cur].value];
+      desc = PK.moveUI.fullDesc(dm) + '\n' + dm.type.toUpperCase() + '  ' + { P: 'PHYSICAL', T: 'TECHNIQUE', S: 'STATUS' }[dm.cat] + (dm.cat === 'S' ? '' : '  POW ' + dm.power) + '  ACC ' + (dm.acc ? dm.acc + '%' : 'SURE');
+    }
     var ls = F().wrap(desc, 216);
     for (var l = 0; l < Math.min(2, ls.length); l++) F().draw(ctx, ls[l], 12, 134 + l * 10, t.text, t.shadow);
     if (this.pocket === 0 || this.pocket === 1) F().right(ctx, '$' + PK.game.state.money, 228, 10, t.dim);
@@ -454,28 +468,29 @@
   async function learnMove(k, moveId) {
     var name = PK.stats.name(k), mn = PK.MOVES[moveId].name;
     if (PK.stats.knows(k, moveId)) return;
-    if (k.moves.length < 4) {
-      k.moves.push({ id: moveId, pp: PK.MOVES[moveId].pp });
-      if (PK.audio) PK.audio.jingle('levelup');
-      return PK.ui.say(name + ' learned ' + mn + '!');
-    }
-    for (;;) {
-      await PK.ui.say(name + ' wants to learn ' + mn + '. But ' + name + ' already knows four moves.');
-      var yes = await PK.ui.yesno('Forget a move to make room for ' + mn + '?');
-      if (yes) {
-        var items = k.moves.map(function (m) { var md = PK.MOVES[m.id]; return { label: md.name, right: md.type }; });
-        items.push({ label: mn + ' (new)', right: PK.MOVES[moveId].type, color: '#2a70c0' });
-        var c = await PK.ui.menu(items, { x: 60, y: 30, w: 170, title: 'Forget which move?' });
-        if (c >= 0 && c < 4) {
-          var old = PK.MOVES[k.moves[c].id].name;
-          k.moves[c] = { id: moveId, pp: PK.MOVES[moveId].pp };
-          await PK.ui.say('1, 2, and... Poof! ' + name + ' forgot ' + old + '.');
-          if (PK.audio) PK.audio.jingle('levelup');
-          return PK.ui.say('And... ' + name + ' learned ' + mn + '!');
-        }
+    var card = PK.moveUI.showMoveCard(moveId);
+    try {
+      if (k.moves.length < 4) {
+        k.moves.push({ id: moveId, pp: PK.MOVES[moveId].pp });
+        if (PK.audio) PK.audio.jingle('levelup');
+        return await PK.ui.say(name + ' learned ' + mn + '!');
       }
-      if (await PK.ui.yesno('Stop trying to teach ' + mn + '?')) return PK.ui.say(name + ' did not learn ' + mn + '.');
-    }
+      for (;;) {
+        await PK.ui.say(name + ' wants to learn ' + mn + '. But ' + name + ' already knows four moves.');
+        var yes = await PK.ui.yesno('Forget a move to make room for ' + mn + '?');
+        if (yes) {
+          var c = await PK.moveUI.moveList({ kit: k, extra: moveId, mode: 'pick', title: 'Forget which move for ' + mn + '?', hint: 'Pick a move to forget, or the NEW move to keep things as they are.' });
+          if (c >= 0 && c < k.moves.length) {
+            var old = PK.MOVES[k.moves[c].id].name;
+            k.moves[c] = { id: moveId, pp: PK.MOVES[moveId].pp };
+            await PK.ui.say('1, 2, and... Poof! ' + name + ' forgot ' + old + '.');
+            if (PK.audio) PK.audio.jingle('levelup');
+            return await PK.ui.say('And... ' + name + ' learned ' + mn + '!');
+          }
+        }
+        if (await PK.ui.yesno('Stop trying to teach ' + mn + '?')) return await PK.ui.say(name + ' did not learn ' + mn + '.');
+      }
+    } finally { PK.pop(card); }
   }
 
   // ================= Evolution =================
@@ -535,7 +550,7 @@
     }
     var id = this.showNew ? this.to : this.k.id;
     if (this.phase === 'done') id = this.k.id;
-    var img = PK.kitArt.get(id, 'front', this.k.prism);
+    var img = PK.kitArt.get(id, 'front', this.k.prism, this.k.tint);
     ctx.drawImage(img, 88, 30);
     if (this.phase === 'anim') { ctx.globalAlpha = this.white; ctx.drawImage(PK.silhouette(img, '#ffffff'), 88, 30); ctx.globalAlpha = 1; }
   };
@@ -605,6 +620,13 @@
   };
 
   // ================= Shop =================
+  function shopInfo(id) {
+    var it = PK.ITEMS[id];
+    if (!it) return '';
+    if (it.pocket !== 'discs') return it.desc;
+    var m = PK.MOVES[it.value];
+    return m.name + ' (' + m.type + (m.cat === 'S' ? ', status' : ', power ' + m.power) + '): ' + PK.moveUI.fullDesc(m);
+  }
   async function shop(stock) {
     var st = PK.game.state;
     for (;;) {
@@ -613,7 +635,7 @@
         for (;;) {
           var items = stock.map(function (id) { return { label: PK.ITEMS[id].name, right: '$' + PK.ITEMS[id].price }; });
           items.push({ label: 'CANCEL' });
-          var i = await PK.ui.menu(items, { x: 60, y: 4, w: 176, maxRows: 9, title: 'Money: $' + st.money });
+          var i = await PK.ui.menu(items, { x: 60, y: 4, w: 176, maxRows: 8, title: 'Money: $' + st.money, info: function (j) { return shopInfo(stock[j]); } });
           if (i < 0 || i === stock.length) break;
           var id = stock[i], it = PK.ITEMS[id];
           var max = Math.min(99, Math.floor(st.money / it.price));
@@ -634,7 +656,7 @@
           var sell = Object.keys(st.bag).filter(function (id) { return PK.ITEMS[id] && PK.ITEMS[id].pocket !== 'key' && PK.ITEMS[id].pocket !== 'discs' && PK.ITEMS[id].price > 0; });
           var sl = sell.map(function (id) { return { label: PK.ITEMS[id].name, right: '×' + st.bag[id] }; });
           sl.push({ label: 'CANCEL' });
-          var si = await PK.ui.menu(sl, { x: 60, y: 4, w: 176, maxRows: 9, title: 'Money: $' + st.money });
+          var si = await PK.ui.menu(sl, { x: 60, y: 4, w: 176, maxRows: 8, title: 'Money: $' + st.money, info: function (j) { return shopInfo(sell[j]); } });
           if (si < 0 || si === sell.length) break;
           var sid = sell[si], price = Math.floor(PK.ITEMS[sid].price / 2);
           var cnt = await PK.ui.number({ min: 1, max: st.bag[sid], w: 110, y: 120, fmt: function (v) { return '$' + v * price; } });

@@ -160,8 +160,7 @@
     var pre = PK.KITS[k.id].from;
     while (pre) { PK.KITS[pre].learn.forEach(function (e) { if (e[0] <= k.level && known.indexOf(e[1]) < 0 && list.indexOf(e[1]) < 0) list.push(e[1]); }); pre = PK.KITS[pre].from; }
     if (!list.length) return w.say('ODO: This Kit has no forgotten moves to remember.');
-    var items = list.map(function (id) { var m = PK.MOVES[id]; return { label: m.name, right: m.type }; });
-    var c = await PK.ui.menu(items, { x: 40, y: 4, w: 196, maxRows: 8, title: 'Remember which move?' });
+    var c = await PK.moveUI.moveList({ moves: list, mode: 'pick', title: 'Remember which move? ($' + FEE + ')', hint: 'A: choose this move.  B: never mind' });
     if (c < 0) return w.say('ODO: Come back whenever you like.');
     if (s.money < FEE) return w.say("ODO: I'm afraid you don't have enough money.");
     var before = k.moves.map(function (m) { return m.id; }).join();

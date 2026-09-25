@@ -8,13 +8,38 @@
   // materials
   var BASE = 0, ACC = 1, BELLY = 2, EYEW = 3, PUPIL = 4, MOUTH = 5, HORN = 6, GLOW = 7, CHEEK = 8, SHINE = 9, DARK = 10, FLAME = 11, LEAF = 12, CRYS = 13, WING = 14, IRIS = 15, LID = 16;
 
-  function palette(spec, prism) {
+  // Cosmetic colour tints a keeper can pick for their own Kit (index stored on the Kit as `tint`)
+  var TINTS = [
+    { name: 'Natural' },
+    { name: 'Ember', hue: 16 }, { name: 'Gold', hue: 44 }, { name: 'Meadow', hue: 110 }, { name: 'Ocean', hue: 205 },
+    { name: 'Twilight', hue: 265 }, { name: 'Blossom', hue: 330 }, { name: 'Shadow', light: -0.2, sat: 0.55 }, { name: 'Frost', light: 0.16, sat: 0.4 }
+  ];
+  function tintColor(hex, t, spread) {
+    var rgb = C().hexToRgb(hex), hsl = C().rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    var h = hsl[0], sat = hsl[1], l = hsl[2];
+    if (t.hue != null) {
+      if (sat < 0.12) sat = 0.35; // greys pick up the new colour too
+      h = t.hue + (spread || 0);
+    }
+    if (t.sat != null) sat *= t.sat;
+    if (t.light != null) l = Math.max(0.06, Math.min(0.94, l + t.light));
+    var o = C().hslToRgb(h, sat, l);
+    return C().rgbToHex(o[0], o[1], o[2]);
+  }
+  function palette(spec, prism, tint) {
     var c = spec.c;
     var base = c[0], acc = c[1], belly = c[2] || C().mix(c[0], '#fff8e8', 0.6);
     if (prism) {
       base = C().hueRotate(base, 140, 1.1, 0.04);
       acc = C().hueRotate(acc, 120, 1.1, 0.04);
       belly = C().hueRotate(belly, 60, 0.8, 0.03);
+    }
+    var tn = tint && TINTS[tint];
+    if (tn && tint > 0) {
+      base = tintColor(base, tn, 0);
+      acc = tintColor(acc, tn, tn.hue != null ? 28 : 0);
+      belly = tn.hue != null ? C().mix(tintColor(belly, tn, -10), '#ffffff', 0.45) : tintColor(belly, tn, 0);
+      spec = Object.assign({}, spec, { wc: spec.wc ? tintColor(spec.wc, tn, 14) : null, lc: spec.lc ? tintColor(spec.lc, tn, 60) : spec.lc });
     }
     var eyeCol = spec.ec || '#1a1426';
     var p = [];
@@ -683,32 +708,32 @@
   };
 
   var cache = {};
-  function get(id, view, prism) {
-    var key = id + '|' + view + '|' + (prism ? 1 : 0);
+  function get(id, view, prism, tint) {
+    var key = id + '|' + view + '|' + (prism ? 1 : 0) + '|' + (tint || 0);
     if (cache[key]) return cache[key];
     var k = PK.KITS[id];
     var spec = Object.assign({ n: k.name, stage: k.stage }, k.art);
     var b = new Builder(spec, view, prism);
     var info = b.build();
-    var canvas = b.g.render(palette(spec, prism), { dither: 0.45 });
+    var canvas = b.g.render(palette(spec, prism, tint), { dither: 0.45 });
     canvas.float = !!info.G.float;
     cache[key] = canvas;
     return canvas;
   }
   // Small party icon (32x32) via scaled render
-  function icon(id, prism) {
-    var key = id + '|icon|' + (prism ? 1 : 0);
+  function icon(id, prism, tint) {
+    var key = id + '|icon|' + (prism ? 1 : 0) + '|' + (tint || 0);
     if (cache[key]) return cache[key];
     var k = PK.KITS[id];
     var spec = Object.assign({ n: k.name, stage: k.stage, icon: true }, k.art);
     spec.s = 0.5;
     var b = new Builder(spec, 'front', prism, 64);
     b.build();
-    var full = b.g.render(palette(spec, prism), { dither: 0.3 });
+    var full = b.g.render(palette(spec, prism, tint), { dither: 0.3 });
     var c = PK.makeCanvas(32, 32);
     c.getContext('2d').drawImage(full, 16, 30, 32, 32, 0, 0, 32, 32);
     cache[key] = c;
     return c;
   }
-  PK.kitArt = { get: get, icon: icon, PLANS: PLANS };
+  PK.kitArt = { get: get, icon: icon, PLANS: PLANS, TINTS: TINTS };
 })();

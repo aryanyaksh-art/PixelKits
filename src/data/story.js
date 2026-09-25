@@ -327,5 +327,19 @@
     await w.say('Home sweet home. There are still rare Kits out there... and Prof. Vale may have news.');
   };
 
+  // Name Sage NPC
+  S.name_sage = async function (w) {
+    await w.say("NAME SAGE ENID: Hello! I'm the Name Sage. A good nickname brings a Kit closer to its keeper.");
+    if (!(await w.yesno('Shall I look at one of your Kits\' names?'))) return w.say('ENID: Come back whenever a name is on your mind!');
+    var i = await PK.menus.party({ mode: 'item' });
+    if (i < 0) return w.say('ENID: Come back whenever a name is on your mind!');
+    var k = PK.game.state.party[i], nm = PK.stats.name(k);
+    var praise = ['a fine, sturdy name', 'a name full of spirit', 'a cheerful little name', 'a truly heroic name'][nm.length % 4];
+    await w.say('ENID: ' + nm + '... ' + nm + '! That is ' + praise + '.');
+    if (!(await w.yesno('ENID: Would you like to give it a different nickname?'))) return w.say('ENID: Yes, ' + nm + ' suits it perfectly.');
+    await PK.moveUI.rename(k);
+    await w.say('ENID: Wonderful. Take good care of ' + PK.stats.name(k) + '!');
+  };
+
   PK.SCRIPTS = S;
 })();

@@ -22,6 +22,8 @@ PixelKits is inspired by the classic handheld monster-collecting RPGs of the lat
 - **Lumora Map** that shows where you are; the **Wayfinder** flies you to any town you've visited.
 - **Trail Bike**, running (hold B), Machete / Pickaxe / Raft field tools, a Seeker Lens for hidden items, Exit Cords for caves. Cleared bushes and rocks stay cleared.
 - **Day/night cycle** from your real clock — some Kits only appear at night or in the morning.
+- **Move details everywhere**: a move card when learning, a full move screen (type, power, accuracy, charges, description) when choosing what to forget, descriptions in the battle move menu, shops, Skill Discs and the Recall Master.
+- **Edit your Kits** (party menu → EDIT, or the Name Sage in Pinecrest): rename, reorder or forget moves, and pick one of 9 color tints.
 - **Menus**: party, 4-page summary, bag with pockets, KitLog, shops, clinics, storage terminal, keeper card, options.
 - **3 save files**, plus **export/import save codes** to move a save between devices.
 - **Original chiptune soundtrack** (30 tracks) and sound effects synthesized live with WebAudio, and a unique procedural cry for every Kit.
